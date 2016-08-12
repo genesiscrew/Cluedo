@@ -11,7 +11,7 @@ public class Empty implements Square {
 	public Empty(int x, int y) {
 		this.x = x;
 		this.y = y;
-		this.name = "-";
+		this.name = "|-";
 
 	}
 
@@ -19,14 +19,34 @@ public class Empty implements Square {
 		notEmpty = b;
 	}
 
-	public boolean isOccupied(Square e){
+	public boolean isOccupied(){
 
-		return false;
+		return notEmpty;
 	}
 
 	public String getName() {
 		return name;
 	}
+
+	@Override
+	public int getX() {
+		
+		return x;
+	}
+
+	@Override
+	public int getY() {
+	
+		return y;
+	}
+
+	@Override
+	public Position getPosition() {
+		
+		return new Position(this.x, this.y);
+	}
+
+
 
 
 

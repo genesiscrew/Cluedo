@@ -4,8 +4,8 @@ public class Block implements Square {
 
 	 private int x;
 	  private int y;
-	  private String name = "*";
-	  private Boolean notEmpty = false;
+	  private String name = "|*";
+	  private Boolean notEmpty;
 
 	public Block(int x, int y) {
 		this.x = x;
@@ -14,20 +14,37 @@ public class Block implements Square {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
+		
 		return name;
 	}
 
 	@Override
-	public boolean isOccupied(Square e) {
-		// TODO Auto-generated method stub
+	public boolean isOccupied() {
+		
 		return true;
 	}
 
 	@Override
 	public void setStatus(boolean b) {
-		// TODO Auto-generated method stub
+		
 
+	}
+
+	@Override
+	public int getX() {
+		
+		return x;
+	}
+
+	@Override
+	public int getY() {
+		
+		return y;
+	}
+	@Override
+	public Position getPosition() {
+		
+		return new Position(this.x, this.y);
 	}
 
 }

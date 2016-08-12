@@ -3,7 +3,7 @@ package cluedo;
 public class Center implements Square {
 	 private int x;
 	  private int y;
-	  private String name = "F";
+	  private String name = "|F";
 	  private Boolean notEmpty = false;
 
 	public Center(int x, int y) {
@@ -13,20 +13,37 @@ public class Center implements Square {
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
+		
 		return this.name;
 	}
 
 	@Override
-	public boolean isOccupied(Square e) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isOccupied() {
+		
+		return true;
 	}
 
 	@Override
 	public void setStatus(boolean b) {
-		// TODO Auto-generated method stub
+	
 
+	}
+
+	@Override
+	public int getX() {
+		
+		return x;
+	}
+
+	@Override
+	public int getY() {
+		
+		return y;
+	}
+	@Override
+	public Position getPosition() {
+		
+		return new Position(this.x, this.y);
 	}
 
 }

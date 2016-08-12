@@ -1,6 +1,11 @@
 package cluedo;
-
+/**
+ * a simple class that represents cards in the game
+ * @author abubakhami
+ *
+ */
 public class Card {
+	
 	private String name;
 	private String type;
 	public Card(String name, String type){
