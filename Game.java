@@ -399,6 +399,7 @@ public Square getPreviousPlayerLocations(String player){
 			player.updateVisitedSquares(previous);
 			this.getBoard().getSquares()[player.getLocation().getX()][player.getLocation().getY()] = player.getLocation();
 
+
 		}
 
 public ArrayList<Player> getPlayers() {

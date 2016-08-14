@@ -40,6 +40,17 @@ public class Room implements Square {
 		 public String getroomName() {
 	        return a;
 	    }
+		 public String getFullName(String s) {
+				//iterate throught all enums
+				for (Room.roomName r:roomName.values()){
+					if (r.getroomName().equals(s)) {
+						return r.name();
+
+					}
+				}
+				return null;
+
+			}
 
 	}
 
@@ -98,6 +109,11 @@ public class Room implements Square {
 		}
 		return null;
 
+	}
+	
+	public int StrLen() {
+		
+		return this.getFullName().length();
 	}
 
 }

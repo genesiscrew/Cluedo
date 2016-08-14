@@ -76,12 +76,12 @@ public class Board {
 
 
 	public void setPlayersOnBoard(int nplayers) {
-		// TODO Auto-generated method stub
+		
 		int count = 1;
 		assert(nplayers > 0);
 
 			 for (Square s: this.getStartingLocations()) {
-                        s = new PlayerSquare(count, s.getX(), s.getY());
+                        s = new PlayerSquare(count, s.getX(), s.getY(), null);
 
 			            }
 

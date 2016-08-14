@@ -6,12 +6,17 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
 
-public class CluedoBoardWithColumnsAndRows {
+import cluedo.Room.roomName;
+
+public class CluedoBoardWithColumnsAndRows implements ActionListener {
 
 	private final JPanel gui = new JPanel(new BorderLayout(9, 9));
 
@@ -20,57 +25,117 @@ public class CluedoBoardWithColumnsAndRows {
 	private static final String COLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	private JPanel cluedoBoard;
 	private final JLabel message = new JLabel("Cluedo is ready to play!");
+	private ArrayList<Image> emptytileImages = new ArrayList<Image>();
+	private ArrayList<Image> ballRoomImages = new ArrayList<Image>();
+	String text = "MISS  SCARLET";
+	int textlen = text.length();
+	ArrayList<Color> colors = new ArrayList<>();
 
 	private Game game;
 
+	private int index4 = 0;
 
-	CluedoBoardWithColumnsAndRows(Game game) {
-		this.game = game;
+	private int index3 = 0;
+
+	public static int x;
+
+	public static int y;
+
+
+	private Controller controller;
+
+
+	CluedoBoardWithColumnsAndRows(Controller controller2) {
+		this.controller = controller2;
+		for (int i = 0; i < 15; i++) {
+			try {
+				emptytileImages.add(ImageIO.read(new File(System.getProperty("user.dir") + "/src/squaretile" + i + ".jpeg")));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+
+		}
+		//initialize ballroom
+
+
+		colors.add(Color.RED);
+		colors.add(Color.BLUE);
+		colors.add(Color.GREEN);
+		colors.add(Color.YELLOW);
+
+
+
+		System.out.println("done");
 		initializeGui();
 
+
 	}
+
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        // TODO Auto-generated method stub
+
+       // System.out.println("button pressed");
+        for (int i = 0; i < cluedoBoardSquares.length; i++) {
+        	  for (int j = 0; j < cluedoBoardSquares[i].length; j++) {
+        	    if( cluedoBoardSquares[i][j] == e.getSource() ) {
+        	     controller.sendCoordinates(i, j);
+        	    }
+        	  }
+        	}
+
+    }
 
 	public final void initializeGui() {
 		// set up the main GUI
 
+		JToolBar tools = new JToolBar();
+	        tools.setFloatable(false);
+	        gui.add(tools, BorderLayout.PAGE_START);
+	        tools.add(new JButton("New")); // TODO - add functionality!
+	        tools.add(new JButton("Save")); // TODO - add functionality!
+	        tools.add(new JButton("Restore")); // TODO - add functionality!
+	        tools.addSeparator();
+	        tools.add(new JButton("Resign")); // TODO - add functionality!
+	        tools.addSeparator();
+	        tools.add(message);
+
+
 		BufferedImage myPicture = null;
+		//initialize ball room graphics
 
-		// try {
-
-			//picLabel2.setLayout(new BorderLayout());
-
-			//Insets imageMargin = new Insets(0, 0, 0, 0);
-			//picLabel.setBounds(0, 0, 0, 0);
 			picLabel.setOpaque(true);
 			picLabel.setVisible(true);
 			picLabel.setLayout(new BorderLayout());
 
 
+
+
 			//picLabel.
 
-			gui.add(picLabel, BorderLayout.PAGE_START);
+			//gui.add(picLabel, BorderLayout.PAGE_START);
 			cluedoBoard = new JPanel(new GridLayout(0, 27));
 			cluedoBoard.setBorder(new LineBorder(Color.BLACK));
 
 			// create the chess board squares
 			Insets buttonMargin = new Insets(0, 0, 0, 0);
+			int index1 = 0;
+			int index2 = 0;
 			for (int ii = 0; ii < cluedoBoardSquares.length; ii++) {
 				for (int jj = 0; jj < cluedoBoardSquares[ii].length; jj++) {
-					JButton b = new JButton();
+					JButton b =  new JButton();
+
+
+
 					b.setMargin(buttonMargin);
 					b.setBounds(0, 0, 0, 0);
-					b.addActionListener(new ActionListener() {
+					//b.setPreferredSize(new Dimension(25,25));
+					b.addActionListener(this);
 
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							if (!e.getActionCommand().isEmpty()) {
-
-								System.out.println("i have been fucking clicked");
-							}
-
-
-						}
-					});
 					// our chess pieces are 64x64 px in size, so we'll
 					// 'fill this in' using a transparent icon..
 					ImageIcon icon = new ImageIcon(new BufferedImage(40, 40, BufferedImage.TYPE_INT_ARGB));
@@ -79,38 +144,94 @@ public class CluedoBoardWithColumnsAndRows {
 					b.setOpaque(true);
 					b.setVisible(true);
 					b.setContentAreaFilled(true);
-					b.setBorderPainted(true);
+					b.setBorderPainted(false);
+					//b.setPreferredSize(new Dimension(200, 200));
 
 
 
-					if (game.getBoard().getSquares()[ii][jj].getName().equals("|-")) {
-						b.setBackground(Color.BLUE);
-						System.out.println("BLUE");
+					if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|-")) {
+
+							Collections.shuffle(emptytileImages);
+							int index = new Random().nextInt(this.emptytileImages.size()-1);
+							b.setIcon(new ImageIcon(emptytileImages.get(index)));
+
+							// TODO Auto-generated catch block
+
+
 
 
 
 					}
-					else if (game.getBoard().getSquares()[ii][jj].getName().equals("|D")) {
-						b.setBackground(Color.ORANGE);
-						
-					}
-					else if (game.getBoard().getSquares()[ii][jj].getName().equals("|S")) {
+
+					else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|S")) {
 						b.setBackground(Color.CYAN);
-						
+
 					}
-					else if (game.getBoard().getSquares()[ii][jj].getName().equals("|D")) {
+
+					else if (this.controller.getGame().getBoard().getSquares()[ii][jj]  instanceof PlayerSquare) {
+
+						PlayerSquare player = (PlayerSquare) this.controller.getGame().getBoard().getSquares()[ii][jj];
+						ImageIcon playerIcon = new ImageIcon(player.getImage());
+						b.setIcon(playerIcon);
+
+					}
+
+					else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|B")) {
+
 						b.setBackground(Color.ORANGE);
-						
-					}
-					else if (game.getBoard().getSquares()[ii][jj].getName().equals("|F")) {
 						b.setBorderPainted(false);
-						b.setBackground(Color.RED);
-						
+						b.setBorder(null);
+						b.setHorizontalTextPosition(SwingConstants.LEFT);
+
+
+
+					}
+					else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|H")) {
+
+						b.setBackground(Color.decode("#9A2727"));
+						b.setBorderPainted(false);
+						b.setBorder(null);
+						b.setHorizontalTextPosition(SwingConstants.LEFT);
+
+
+
+					}
+
+					else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|D")) {
+						try {
+							b.setIcon(new ImageIcon(ImageIO.read(new File(System.getProperty("user.dir") + "/src/doorimage.jpeg" ))));
+							b.setBorder(null);
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+
+					}
+					else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|F")) {
+						Color randomcol = colors.get(new Random().nextInt(colors.size()));
+						b.setBackground(Color.BLACK);
+						b.setBorderPainted(false);
+						b.setBorder(null);
+						b.setHorizontalTextPosition(SwingConstants.LEFT);
+						if (index1 < textlen && index2 >= 12) {
+						b.setBorderPainted(false);
+
+						b.setText(text.substring(index1, index1+1));
+						b.setFont(new Font("Dialog", Font.BOLD, 12));
+						b.setForeground(randomcol);
+						index1++;
+						}
+						index2++;
+
+
 					}
 					else {
 						b.setBackground(Color.BLACK);
 						b.setBorderPainted(false);
-						System.out.println("BLACK");
+						b.setForeground(Color.BLACK);
+
+
+
 
 					}
 
@@ -145,7 +266,7 @@ public class CluedoBoardWithColumnsAndRows {
 			 boardImage.setLayout(new BorderLayout());
 			 gui.add(boardImage, BorderLayout.NORTH);
 			 */
-			System.out.println("i am here");
+
 		//} catch (IOException e) {
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
@@ -156,7 +277,7 @@ public class CluedoBoardWithColumnsAndRows {
 
 		picLabel.add(cluedoBoard);
 
-		//gui.add(cluedoBoard);
+		gui.add(picLabel);
 
 
 
@@ -175,38 +296,6 @@ public class CluedoBoardWithColumnsAndRows {
 	}
 
 	public static void main(String[] args) {
-		Runnable r = new Runnable() {
 
-			@Override
-			public void run() {
-				  Game game = new Game();
-			        Board bb = null;
-			        ;
-			        try {
-
-			            bb = game.createBoardFromFile(System.getProperty("user.dir") + "/src/board1",
-			                    System.getProperty("user.dir") + "/src/doors.txt", System.getProperty("user.dir") + "/src/tunnels");
-			        } catch (IOException e) {
-
-			            e.printStackTrace();
-			        }
-				CluedoBoardWithColumnsAndRows cb = new CluedoBoardWithColumnsAndRows(game);
-				JFrame f = new JFrame("CluedoGUI");
-
-				f.add(cb.getPic());
-				f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				f.setLocationByPlatform(true);
-                // wow.se
-				// ensures the frame is the minimum size it needs to be
-				// in order display the components within it
-				//f.setContentPane(cb.);
-				f.pack();
-				// ensures the minimum size is enforced.
-				f.setSize(1000,1000);
-				f.setVisible(true);
-
-			}
-		};
-		SwingUtilities.invokeLater(r);
-	}
+}
 }

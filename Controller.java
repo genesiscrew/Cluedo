@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
 
 import cluedo.Player.Character;
@@ -15,7 +17,16 @@ import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
 public class Controller {
-    /**
+    private static Runnable r;
+	private static Game game;
+	private int x;
+	private static Position coordinate;
+
+	public Game getGame() {
+
+		return this.game;
+	}
+	/**
      * Get integer from System.in
      */
     private static int inputNumber(String msg) {
@@ -189,6 +200,7 @@ System.out.println("Invalid Input");
      * @param game
      * @return
      * @throws IOException
+     * [
      */
     private static ArrayList<Player> inputPlayers(int nplayers, Game game) throws IOException {
         // set up the tokens
@@ -216,7 +228,7 @@ System.out.println("Invalid Input");
             }
             // we get the required starting location based on character chosen
             int[] xy = game.getTokenStartLocation(token);
-            PlayerSquare start = new PlayerSquare(token.getNumVal(), xy[0], xy[1]);
+            PlayerSquare start = new PlayerSquare(token.getNumVal(), xy[0], xy[1], token.ImageEnum());
             tokens.remove(token);
             game.addPlayer(new Player(name, token, start));
 
@@ -236,8 +248,10 @@ System.out.println("Invalid Input");
      * @throws IOException
      */
     public static void main(String args[]) throws IOException {
-        Game game = new Game();
+        game = new Game();
         Board bb = null;
+        Controller controller = new Controller();
+
         ;
         try {
 
@@ -248,9 +262,33 @@ System.out.println("Invalid Input");
             e.printStackTrace();
         }
 
-        // Print banner ;)
+
+        r = new Runnable() {
+            // this method updates the GUI
+			@Override
+			public void run() {
 
 
+
+				CluedoBoardWithColumnsAndRows cb = new CluedoBoardWithColumnsAndRows(controller);
+				JFrame f = new JFrame("CluedoGUI");
+
+				f.add(cb.getGui());
+				f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				f.setLocationByPlatform(true);
+                // wow.se
+				// ensures the frame is the minimum size it needs to be
+				// in order display the components within it
+				//f.setContentPane(cb.);
+				f.pack();
+				// ensures the minimum size is enforced.
+				f.setSize(1680,1024);
+				//f.setResizable(false);
+				f.setVisible(true);
+
+			}
+		};
+		// Print banner ;)
 System.out.println("CCCCCCCCCCCCCLLLLLLLLLLL            UUUUUUUU     UUUUUUUUEEEEEEEEEEEEEEEEEEEEEEDDDDDDDDDDDDD             OOOOOOOOO");
 System.out.println("CCC::::::::::::CL:::::::::L            U::::::U     U::::::UE::::::::::::::::::::ED::::::::::::DDD        OO:::::::::OO");
 System.out.println("CC:::::::::::::::CL:::::::::L            U::::::U     U::::::UE::::::::::::::::::::ED:::::::::::::::DD    OO:::::::::::::OO");
@@ -279,6 +317,7 @@ System.out.println("By Hamid Abubakr");
         // game.updatePlayersonBoard();
         // Draw Board
         game.drawBoard();
+        SwingUtilities.invokeLater(r);
         // create deck of cards for the game to play with
 
         // shuffle the deck of cards
@@ -313,8 +352,12 @@ System.out.println("By Hamid Abubakr");
                         makeAccusation(p, game);
                         // is user still in game?
                         if (p.InGame) {
-                            movePlayer(p, diceRoll, game);
-                            moved = true;
+                        
+                        		 movePlayer(p, diceRoll, game);
+                                 moved = true;
+         	
+                        	
+                           
                         }
                     }
                     // if player in room, and did not suggest, make him suggest
@@ -502,7 +545,7 @@ System.out.println("By Hamid Abubakr");
      * @param diceRoll
      * @param game
      */
-    public static void movePlayer(Player player, int diceRoll, Game game) {
+    public static  void movePlayer(Player player, int diceRoll, Game game) {
         boolean ended = false;
         while (diceRoll > 0 && !ended) {
             System.out.println();
@@ -516,13 +559,17 @@ System.out.println("By Hamid Abubakr");
             System.out.println();
             System.out.println("You have " + diceRoll + " moves left");
             String direction = inputString(player.getName() + " ,please enter a direction:");
-
+            
             try {
                 // if user enters E, we end turn
-                if (!direction.equalsIgnoreCase("e")) {
+                if (coordinate != null) {
 
                     Position oldPosition = new Position(player.getLocation().getX(), player.getLocation().getY());
-                    Position newPosition = game.updatePosition(oldPosition, direction);
+                    //Position newPosition = game.updatePosition(oldPosition, direction);
+                    Position newPosition = coordinate;
+                    System.out.println(oldPosition.row());
+                    System.out.println(newPosition.row());
+
                     Square oldSquare = player.getlastSquare();
                     Square newSquare = game.getBoard().squareAt(newPosition);
                     // check of player move is valid
@@ -579,6 +626,8 @@ System.out.println("By Hamid Abubakr");
                         //
 
                         game.drawBoard();
+                        SwingUtilities.invokeLater(r);
+                        coordinate = null;
                         // check if player is in room. if they are then stop
                         // their
                         // movement and exit this method
@@ -603,5 +652,11 @@ System.out.println("By Hamid Abubakr");
         System.out.println("Moves for " + player.getName() + " have finished.");
         player.resetVisitedSquares();
     }
+	public void sendCoordinates(int ii, int jj) {
+		this.coordinate = new Position(ii, jj);
+
+
+
+	}
 
 }

@@ -1,6 +1,12 @@
 package cluedo;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
@@ -83,6 +89,7 @@ public Weapons getWeapon(){
 
 		private int a;
 
+
 		Character(int a){
 
 			this.a = a;
@@ -91,6 +98,18 @@ public Weapons getWeapon(){
 		 public int getNumVal() {
 	        return a;
 	    }
+
+		   public Image ImageEnum() {
+
+			 try {
+
+				return ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/" + this.a + ".png" ));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 return null;
+		   }
 
 
 	}
@@ -122,12 +141,14 @@ public Weapons getWeapon(){
 	public boolean isValidMove(Position newPosition, Position oldPosition, Board board) {
 
         Square newSquare = board.squareAt(newPosition);
+        int xDiff = Math.abs(newPosition.row())-Math.abs(oldPosition.row());
+        int yDiff = Math.abs(newPosition.column())-Math.abs(oldPosition.column());
 
 
 
 		 return // first condition is for movement outside the rooms
 				 !board.squareAt(newPosition).isOccupied()&&!this.visitedBefore.contains(board.squareAt(newPosition))
-				&& newSquare instanceof Room == false && newSquare instanceof Tunnel == false && !inRoom
+				&& newSquare instanceof Room == false && newSquare instanceof Tunnel == false && !inRoom && xDiff <= 1 && yDiff <= 1
 				//second expression is for entering rooms from doors
 				||(newSquare instanceof Room && this.lv instanceof Door && !this.inRoom
 						&& !board.squareAt(newPosition).isOccupied()
