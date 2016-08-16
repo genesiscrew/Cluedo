@@ -36,7 +36,6 @@ private static final String COLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 private JPanel cluedoBoard;
 
 public BoardwithSquares(){
-	System.out.println("i have been fucking launched");
 
     try {
 		this.background           =  ImageIO.read(new File(System.getProperty("user.dir") + "/src/boardimage.jpg"));

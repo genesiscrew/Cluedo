@@ -19,6 +19,8 @@ import cluedo.Weapon.Weapons;
 public class Controller {
     private static Runnable r;
 	private static Game game;
+	JFrame cb;
+	private static JFrame f;
 	private int x;
 	private static Position coordinate;
 
@@ -205,6 +207,7 @@ System.out.println("Invalid Input");
     private static ArrayList<Player> inputPlayers(int nplayers, Game game) throws IOException {
         // set up the tokens
         ArrayList<Player> players = null;
+        ArrayList<String> names = new ArrayList<String>();
         try {
         ArrayList<Player.Character> tokens = new ArrayList<Player.Character>();
         for (Player.Character t : Player.Character.values()) {
@@ -216,6 +219,12 @@ System.out.println("Invalid Input");
 
         for (int i = 0; i != nplayers; ++i) {
             String name = inputString("Player #" + (i+1) + " name?");
+            if (i > 0) {
+            while (names.contains(name)) {
+            	System.out.println("Duplicate name entered! please modify your name of enter a new name");
+            	 name = inputString("Player #" + (i+1) + " name?");
+            }
+            }
             String tokenName = characterList();
             Player.Character token = Player.Character.valueOf(tokenName);
             while (!tokens.contains(token)) {
@@ -230,7 +239,9 @@ System.out.println("Invalid Input");
             int[] xy = game.getTokenStartLocation(token);
             PlayerSquare start = new PlayerSquare(token.getNumVal(), xy[0], xy[1], token.ImageEnum());
             tokens.remove(token);
+            names.add(name);
             game.addPlayer(new Player(name, token, start));
+            
 
         }
         }
@@ -263,31 +274,39 @@ System.out.println("Invalid Input");
         }
 
 
-        r = new Runnable() {
+       // r = new Runnable() {
             // this method updates the GUI
-			@Override
-			public void run() {
+		//	@Override
+		//	public void run() {
 
 
+				try {
+					Thread.sleep(25);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // 0.1s delay
+				controller.f = new CluedoBoardWithColumnsAndRows(controller);
+				//controller.f = new JFrame("CluedoGUI");
 
-				CluedoBoardWithColumnsAndRows cb = new CluedoBoardWithColumnsAndRows(controller);
-				JFrame f = new JFrame("CluedoGUI");
-
-				f.add(cb.getGui());
-				f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-				f.setLocationByPlatform(true);
+				controller.f.add(((CluedoBoardWithColumnsAndRows) controller.f).getGui());
+				controller.f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				controller.f.setLocationByPlatform(true);
                 // wow.se
 				// ensures the frame is the minimum size it needs to be
 				// in order display the components within it
 				//f.setContentPane(cb.);
-				f.pack();
+				controller.f.pack();
 				// ensures the minimum size is enforced.
-				f.setSize(1680,1024);
+				controller.f.setSize(1680,1024);
 				//f.setResizable(false);
-				f.setVisible(true);
+				controller.f.setVisible(true);
+				controller.f.repaint();
 
-			}
-		};
+
+			//}
+
+	//	};
 		// Print banner ;)
 System.out.println("CCCCCCCCCCCCCLLLLLLLLLLL            UUUUUUUU     UUUUUUUUEEEEEEEEEEEEEEEEEEEEEEDDDDDDDDDDDDD             OOOOOOOOO");
 System.out.println("CCC::::::::::::CL:::::::::L            U::::::U     U::::::UE::::::::::::::::::::ED::::::::::::DDD        OO:::::::::OO");
@@ -317,8 +336,9 @@ System.out.println("By Hamid Abubakr");
         // game.updatePlayersonBoard();
         // Draw Board
         game.drawBoard();
-        SwingUtilities.invokeLater(r);
-        // create deck of cards for the game to play with
+        ((CluedoBoardWithColumnsAndRows) f).updateBoard();
+        ((CluedoBoardWithColumnsAndRows) f).drawBoard();
+
 
         // shuffle the deck of cards
         Collections.shuffle(game.getDeck().cards);
@@ -352,12 +372,12 @@ System.out.println("By Hamid Abubakr");
                         makeAccusation(p, game);
                         // is user still in game?
                         if (p.InGame) {
-                        
+
                         		 movePlayer(p, diceRoll, game);
                                  moved = true;
-         	
-                        	
-                           
+
+
+
                         }
                     }
                     // if player in room, and did not suggest, make him suggest
@@ -505,6 +525,8 @@ System.out.println("By Hamid Abubakr");
         game.movesuggestedWeapontoRoom(weapon, roomName);
         game.updatePlayersonBoard();
         game.drawBoard();
+        ((CluedoBoardWithColumnsAndRows) f).updateBoard();
+        ((CluedoBoardWithColumnsAndRows) f).drawBoard();
         // now we check with each user whether they have one or many
         // of suggested cards
 
@@ -559,7 +581,7 @@ System.out.println("By Hamid Abubakr");
             System.out.println();
             System.out.println("You have " + diceRoll + " moves left");
             String direction = inputString(player.getName() + " ,please enter a direction:");
-            
+
             try {
                 // if user enters E, we end turn
                 if (coordinate != null) {
@@ -626,7 +648,15 @@ System.out.println("By Hamid Abubakr");
                         //
 
                         game.drawBoard();
-                        SwingUtilities.invokeLater(r);
+                        ((CluedoBoardWithColumnsAndRows) f).updateBoard();
+                        ((CluedoBoardWithColumnsAndRows) f).drawBoard();
+
+
+
+
+
+
+
                         coordinate = null;
                         // check if player is in room. if they are then stop
                         // their
@@ -652,6 +682,7 @@ System.out.println("By Hamid Abubakr");
         System.out.println("Moves for " + player.getName() + " have finished.");
         player.resetVisitedSquares();
     }
+
 	public void sendCoordinates(int ii, int jj) {
 		this.coordinate = new Position(ii, jj);
 

@@ -141,14 +141,14 @@ public Weapons getWeapon(){
 	public boolean isValidMove(Position newPosition, Position oldPosition, Board board) {
 
         Square newSquare = board.squareAt(newPosition);
-        int xDiff = Math.abs(newPosition.row())-Math.abs(oldPosition.row());
-        int yDiff = Math.abs(newPosition.column())-Math.abs(oldPosition.column());
+        int xDiff = Math.abs(newPosition.row()-oldPosition.row());
+        int yDiff = Math.abs(newPosition.column()-oldPosition.column());
 
 
 
 		 return // first condition is for movement outside the rooms
 				 !board.squareAt(newPosition).isOccupied()&&!this.visitedBefore.contains(board.squareAt(newPosition))
-				&& newSquare instanceof Room == false && newSquare instanceof Tunnel == false && !inRoom && xDiff <= 1 && yDiff <= 1
+				&& newSquare instanceof Room == false && newSquare instanceof Tunnel == false && !inRoom && ((xDiff <= 1 && yDiff == 0)|| (xDiff == 0 && yDiff <= 1))
 				//second expression is for entering rooms from doors
 				||(newSquare instanceof Room && this.lv instanceof Door && !this.inRoom
 						&& !board.squareAt(newPosition).isOccupied()
