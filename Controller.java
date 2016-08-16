@@ -1,5 +1,7 @@
 package cluedo;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,13 +18,16 @@ import cluedo.Player.Character;
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
-public class Controller {
+public class Controller implements ActionListener  {
     private static Runnable r;
 	private static Game game;
 	JFrame cb;
 	private static JFrame f;
 	private int x;
+	private static boolean moveRequest = false;
 	private static Position coordinate;
+	private static boolean ended = false;
+	private static int diceRoll = 0;
 
 	public Game getGame() {
 
@@ -43,7 +48,28 @@ public class Controller {
             }
         }
     }
+    // listens to input in GUI
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
+        // check if tile pressed in board. if so send coordinates
+
+
+        for (int i = 0; i < ((CluedoBoardWithColumnsAndRows) f).getGUIBoard().length; i++) {
+        	  for (int j = 0; j < ((CluedoBoardWithColumnsAndRows) f).getGUIBoard()[i].length; j++) {
+        	    if( ((CluedoBoardWithColumnsAndRows) f).getGUIBoard()[i][j] == e.getSource() ) {
+        	     this.sendCoordinates(i, j);
+        	     // confirmed one of the buttons in our tile arrrat has been pressed
+        	     moveRequest  = true;
+        	     
+        	    }
+        	  }
+        	}
+        // check if
+
+
+
+    }
     /**
      * input a string
      *
@@ -241,7 +267,7 @@ System.out.println("Invalid Input");
             tokens.remove(token);
             names.add(name);
             game.addPlayer(new Player(name, token, start));
-            
+
 
         }
         }
@@ -274,39 +300,26 @@ System.out.println("Invalid Input");
         }
 
 
-       // r = new Runnable() {
-            // this method updates the GUI
-		//	@Override
-		//	public void run() {
 
-
-				try {
-					Thread.sleep(25);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} // 0.1s delay
 				controller.f = new CluedoBoardWithColumnsAndRows(controller);
-				//controller.f = new JFrame("CluedoGUI");
+
 
 				controller.f.add(((CluedoBoardWithColumnsAndRows) controller.f).getGui());
 				controller.f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				controller.f.setLocationByPlatform(true);
-                // wow.se
+
 				// ensures the frame is the minimum size it needs to be
 				// in order display the components within it
-				//f.setContentPane(cb.);
+
 				controller.f.pack();
 				// ensures the minimum size is enforced.
-				controller.f.setSize(1680,1024);
+				controller.f.setSize(1024,768);
 				//f.setResizable(false);
 				controller.f.setVisible(true);
 				controller.f.repaint();
 
 
-			//}
 
-	//	};
 		// Print banner ;)
 System.out.println("CCCCCCCCCCCCCLLLLLLLLLLL            UUUUUUUU     UUUUUUUUEEEEEEEEEEEEEEEEEEEEEEDDDDDDDDDDDDD             OOOOOOOOO");
 System.out.println("CCC::::::::::::CL:::::::::L            U::::::U     U::::::UE::::::::::::::::::::ED::::::::::::DDD        OO:::::::::OO");
@@ -357,7 +370,8 @@ System.out.println("By Hamid Abubakr");
         while (game.getStatus()) {
             for (Player p : game.getPlayers()) {
                 if (p.InGame) {
-                    int diceRoll = rand.nextInt(12);
+                    //diceRoll = rand.nextInt(12);
+                	diceRoll = 1000;
                     if (diceRoll < 2) {
 
                         diceRoll = 2;
@@ -372,10 +386,27 @@ System.out.println("By Hamid Abubakr");
                         makeAccusation(p, game);
                         // is user still in game?
                         if (p.InGame) {
-
-                        		 movePlayer(p, diceRoll, game);
+                        	// user has to move
+                                 while (!moveRequest) {
+                                	 // loop till user selects a tile to move into
+                                	  	try {
+                        					Thread.sleep(25);
+                        				} catch (InterruptedException e) {
+                        					// TODO Auto-generated catch block
+                        					e.printStackTrace();
+                        				}
+                                 }
+                                 while (diceRoll > 0 && !ended) {
+                        		 if (movePlayer(p, game)) {
+                        			 System.out.println("player moved");
+                            		 diceRoll--; 
+                        			 
+                        		 }
+                        		 
+                                 }
                                  moved = true;
-
+                                 ended = false;
+                                 p.resetVisitedSquares();
 
 
                         }
@@ -398,7 +429,15 @@ System.out.println("By Hamid Abubakr");
                             // him
                         } else {
                             if (!moved) {
-                                movePlayer(p, diceRoll, game);
+                            	  while (diceRoll > 0 && !ended) {
+                            		  if (movePlayer(p, game)) {
+                             			 System.out.println("player moved");
+                                 		 diceRoll--; 
+                             			 
+                             		 }
+                                      }
+                                      moved = true;
+                                      ended = false;
                             }
                         }
                         // turn has finished, so we reset all weapon squares
@@ -520,8 +559,17 @@ System.out.println("By Hamid Abubakr");
 
         }
 
-        // first we bring the player and the weapon to the same room
+        // first we bring the player token and the weapon to the same room
+        // we check if token is chosen by a player, if not we just move a token then, else we move an actual player there
+        if (suspect == null){
+        	System.out.println("token not chosen by player");
+        	System.out.println(suspectName+roomName);
+        	game.moveTokentoRoom(suspectName, roomName);
+        	
+        }
+        else {
         game.movesuggestedPlayertoRoom(suspect, p.getlastSquare().getName());
+        }
         game.movesuggestedWeapontoRoom(weapon, roomName);
         game.updatePlayersonBoard();
         game.drawBoard();
@@ -567,9 +615,9 @@ System.out.println("By Hamid Abubakr");
      * @param diceRoll
      * @param game
      */
-    public static  void movePlayer(Player player, int diceRoll, Game game) {
-        boolean ended = false;
-        while (diceRoll > 0 && !ended) {
+    public static  boolean movePlayer(Player player,  Game game) {
+       
+      //  while (diceRoll > 0 && !ended) {
             System.out.println();
             System.out.println("***************");
             System.out.println("W for up");
@@ -579,9 +627,21 @@ System.out.println("By Hamid Abubakr");
             System.out.println("or E to END turn");
             System.out.println("********************");
             System.out.println();
-            System.out.println("You have " + diceRoll + " moves left");
-            String direction = inputString(player.getName() + " ,please enter a direction:");
-
+           
+            //String direction = inputString(player.getName() + " ,please enter a direction:");
+           
+            
+            while (coordinate == null) {
+            	//wait untill user has selected a tile
+            	//System.out.println("loop of hell");
+            	try {
+					Thread.sleep(25);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+            }
             try {
                 // if user enters E, we end turn
                 if (coordinate != null) {
@@ -601,11 +661,11 @@ System.out.println("By Hamid Abubakr");
                         // entrance event
                         if (!player.inRoom()) {
 
-                            diceRoll--;
+                            
 
                             if (oldSquare instanceof Door && newSquare instanceof Room) {
                                 // confirmed, user entered room
-                                diceRoll = 0;
+                               diceRoll = 0;
 
                                 System.out.println(player.getName() + ", you have entered the "
                                         + ((Room) newSquare).getFullName());
@@ -650,6 +710,7 @@ System.out.println("By Hamid Abubakr");
                         game.drawBoard();
                         ((CluedoBoardWithColumnsAndRows) f).updateBoard();
                         ((CluedoBoardWithColumnsAndRows) f).drawBoard();
+                        System.out.println("board updated");
 
 
 
@@ -665,22 +726,31 @@ System.out.println("By Hamid Abubakr");
                     } // player made invalid move
                     else {
                         System.out.println("Invalid direction, please try again");
+                        return false;
                     }
                     // }
                 } else {
                     System.out.println("Turn for " + player.getName() + " has ended");
                     player.resetVisitedSquares();
                     ended = true;
+                    if (!player.inRoom) {return true;}
+                    return false;
+                    
 
                 }
             } catch (Exception e) {
                 System.out.println("Invalid Input");
+                return false;
 
             }
 
-        }
+       // }
         System.out.println("Moves for " + player.getName() + " have finished.");
-        player.resetVisitedSquares();
+        moveRequest = false;
+        if (!player.inRoom) {return true;}
+        return false;
+        
+        
     }
 
 	public void sendCoordinates(int ii, int jj) {

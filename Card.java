@@ -1,17 +1,22 @@
 package cluedo;
+
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+
 /**
  * a simple class that represents cards in the game
  * @author abubakhami
  *
  */
 public class Card {
-	
+
 	private String name;
 	private String type;
-	public Card(String name, String type){
+	private Image image;
+	public Card(String name, String type, Image bufferedImage){
 		this.name = name;
 		this.type = type;
-
+		this.image = bufferedImage;
 
 	}
 

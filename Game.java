@@ -35,7 +35,12 @@ public class Game {
 
 	public Game(){
         // every new game instance start with a new deck of cards
-		deck = new Deck();
+		try {
+			deck = new Deck();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		secret = new ArrayList<Card>();
 		players = new ArrayList<Player>();
 		remainingCards = new ArrayList<Card>();
@@ -600,6 +605,29 @@ public void removeWeaponsfromRoom() {
 
 
 
+}
+// move character token to room
+public void moveTokentoRoom(String suspectName, String roomtoMoveInto) {
+	for (Square[] s: this.getBoard().getSquares()) {
+		for (Square a:s) {
+			if (   a instanceof Room && ((Room) a).getFullName().equals(roomtoMoveInto)  && !a.isOccupied()) {
+				//Player suspect = this.getPlayer(suspectName);
+				System.out.println("i does here motherfucker");
+				Position target = new Position(a.getX(), a.getY());
+			
+                PlayerSquare token = new PlayerSquare(cluedo.Player.Character.valueOf(suspectName).getNumVal(),a.getX(), a.getY(), cluedo.Player.Character.valueOf(suspectName).ImageEnum());
+	            // update board
+	            this.getBoard().getSquares()[a.getX()][a.getY()] = token;
+	            return;
+				//break;
+				
+			}
+          
+		}
+
+
+	}
+	
 }
 
 }
