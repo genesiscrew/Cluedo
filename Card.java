@@ -29,6 +29,10 @@ public class Card {
 		return type;
 
 	}
+	public Image getImage() {
+		return this.image;
+
+	}
 
 
 	@Override

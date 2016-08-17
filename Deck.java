@@ -45,13 +45,24 @@ public class Deck {
 
 
    }
-	      {
+
+
+   {
 
 
 
 		};
 
+public boolean remove(Card card) {
+	for (int i = 0; i < this.cards.size(); i++) {
+		if (cards.get(i).getName().equals(card.getName())) {
+			cards.remove(i);
+			return true;
+		}
 
+	}
+	return false;
+}
 
 
 }

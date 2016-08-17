@@ -25,7 +25,7 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 	private static final String COLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	JToolBar tools;
 	private JPanel cluedoBoard;
-	private final JLabel message = new JLabel("Cluedo is ready to play!");
+	private JLabel message = new JLabel("Cluedo is ready to play!");
 	private ArrayList<Image> emptytileImages = new ArrayList<Image>();
 	private ArrayList<Image> ballRoomImages = new ArrayList<Image>();
 	String text = "CLUEDO";
@@ -85,9 +85,16 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 		tools = new JToolBar();
 		tools.setFloatable(false);
 		gui.add(tools, BorderLayout.PAGE_END);
-		tools.add(new JButton("New")); // TODO - add functionality!
-		tools.add(new JButton("Save")); // TODO - add functionality!
-		tools.add(new JButton("Restore")); // TODO - add functionality!
+		JButton newButton = new JButton("New");
+		newButton.addActionListener(this.controller);
+		tools.add(newButton); // TODO - add functionality!
+		JButton suggest = new JButton("Suggest");
+		suggest.addActionListener(this.controller);
+		tools.add(suggest); // TODO - add functionality!
+		tools.add(newButton); // TODO - add functionality!
+		JButton accuse = new JButton("Accuse");
+		accuse.addActionListener(this.controller);
+		tools.add(accuse); // TODO - add functionality!
 		tools.addSeparator();
 		tools.add(new JButton("Resign")); // TODO - add functionality!
 		tools.addSeparator();
@@ -175,7 +182,7 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 
 				} else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|H")) {
 
-					b.setBackground(Color.decode("#9A2727"));
+					b.setBackground(Color.decode("#370000"));
 					b.setBorderPainted(false);
 					b.setBorder(null);
 					b.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -226,8 +233,37 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 
 	}
 
-	public void updateBoard() {
+	public void updateBoard(Player p) {
+		// update dashboard for each player
 		cluedoBoard.removeAll();
+		tools.removeAll();
+		message = new JLabel(p.getCharacter().name() + "'s turn to play");
+		tools.setFloatable(false);
+		JButton newButton = new JButton("New");
+		newButton.addActionListener(this.controller);
+		tools.add(newButton); // TODO - add functionality!
+		JButton suggest = new JButton("Suggest");
+		suggest.addActionListener(this.controller);
+		tools.add(suggest); // TODO - add functionality!
+		tools.add(newButton); // TODO - add functionality!
+		JButton accuse = new JButton("Accuse");
+		accuse.addActionListener(this.controller);
+		tools.add(accuse); // TODO - add functionality!
+		tools.addSeparator();
+		tools.add(new JButton("Resign")); // TODO - add functionality!
+		tools.addSeparator();
+		tools.add(message);
+
+		tools.add(message);
+		tools.addSeparator();
+		for (Card c : p.getHand()) {
+			JButton imageButton = new JButton();
+			Image dimg = c.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+			imageButton.setIcon(new ImageIcon(dimg));
+			tools.add(imageButton);
+			tools.addSeparator();
+		}
+
 		Insets buttonMargin = new Insets(0, 0, 0, 0);
 		int index1 = 0;
 		int index2 = 0;
@@ -284,11 +320,18 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 					b.setHorizontalTextPosition(SwingConstants.LEFT);
 
 				} else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|H")) {
-
-					b.setBackground(Color.decode("#9A2727"));
-					b.setBorderPainted(false);
-					b.setBorder(null);
-					b.setHorizontalTextPosition(SwingConstants.LEFT);
+					if ( p.inRoom && p.getRoomName().equals(roomName.Hall.toString())) {
+				
+						b.setBackground(Color.decode("#B60000"));
+						b.setBorderPainted(false);
+						b.setBorder(null);
+						b.setHorizontalTextPosition(SwingConstants.LEFT);
+					} else {
+						b.setBackground(Color.decode("#370000"));
+						b.setBorderPainted(false);
+						b.setBorder(null);
+						b.setHorizontalTextPosition(SwingConstants.LEFT);
+					}
 
 				} else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|E")) {
 

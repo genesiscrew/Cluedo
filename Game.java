@@ -30,7 +30,7 @@ public class Game {
 	private Deck deck;
 	private ArrayList<Card> secret;
 	private ArrayList<Card> remainingCards;
-	private boolean gameStatus = true;
+	private boolean gameStatus = false;
 	private Map<String,Square> previousPlayerLocations;
 
 	public Game(){
@@ -293,7 +293,7 @@ public Square getPreviousPlayerLocations(String player){
 		index = rand.nextInt(this.deck.cards.size());
 		Card chosen = this.deck.cards.get(index);
 		//remove selected card from deck
-		this.deck.cards.remove(index);
+
 		//return random card
 		return chosen;
 
@@ -303,25 +303,32 @@ public Square getPreviousPlayerLocations(String player){
 		 */
 
 		public void selectSecretCards(){
+			System.out.println("the secret deck size is: " + this.deck.cards.size());
 			Card weapon = this.getRandomCard();
 			while (!weapon.getype().equals("Weapon")) {
 
 				weapon = this.getRandomCard();
+
 			}
+			this.deck.remove(weapon);
 			Card room = this.getRandomCard();
 			while (!room.getype().equals("Room")) {
 
 				room = this.getRandomCard();
+
 			}
+			this.deck.remove(room);
 			Card suspect = this.getRandomCard();
 			while (!suspect.getype().equals("Character")) {
 
 				suspect = this.getRandomCard();
+
 			}
+			this.deck.remove(suspect);
 				secret.add(weapon);
 				secret.add(room);
 				secret.add(suspect);
-
+				System.out.println(" the secret deck size is: " + this.deck.cards.size());
 
 		}
 		public ArrayList<Card> getSecretCards(){
@@ -334,19 +341,24 @@ public Square getPreviousPlayerLocations(String player){
 		public void dealCards() {
 			int playerNum = this.players.size();
 			int cardsAmount = this.deck.cards.size();
-
+			System.out.println(" the deck size are: " + deck.cards.size());
 
 
 			while ((cardsAmount%playerNum) != 0) {
-				remainingCards.add(this.getRandomCard());
+				Card throwAway = this.getRandomCard();
+				remainingCards.add(throwAway);
+				this.deck.remove(throwAway);
 				cardsAmount = this.deck.cards.size();
 			}
 
 			while(this.deck.cards.size() > 0) {
 			for (Player p: this.players) {
-				p.GiveCard(this.getRandomCard());
+				Card card = this.getRandomCard();
+				p.GiveCard(card);
+				this.deck.remove(card);
 			}
 			}
+			System.out.println(" the reminaining cards are: " + remainingCards.size());
 
 		}
 		/**
@@ -614,20 +626,20 @@ public void moveTokentoRoom(String suspectName, String roomtoMoveInto) {
 				//Player suspect = this.getPlayer(suspectName);
 				System.out.println("i does here motherfucker");
 				Position target = new Position(a.getX(), a.getY());
-			
+
                 PlayerSquare token = new PlayerSquare(cluedo.Player.Character.valueOf(suspectName).getNumVal(),a.getX(), a.getY(), cluedo.Player.Character.valueOf(suspectName).ImageEnum());
 	            // update board
 	            this.getBoard().getSquares()[a.getX()][a.getY()] = token;
 	            return;
 				//break;
-				
+
 			}
-          
+
 		}
 
 
 	}
-	
+
 }
 
 }

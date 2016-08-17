@@ -145,7 +145,10 @@ public Weapons getWeapon(){
         int yDiff = Math.abs(newPosition.column()-oldPosition.column());
 
 
+        if (inRoom) {
 
+        	System.out.println("WHAT THE HELL IS GOING ON");
+        }
 		 return // first condition is for movement outside the rooms
 				 !board.squareAt(newPosition).isOccupied()&&!this.visitedBefore.contains(board.squareAt(newPosition))
 				&& newSquare instanceof Room == false && newSquare instanceof Tunnel == false && !inRoom && ((xDiff <= 1 && yDiff == 0)|| (xDiff == 0 && yDiff <= 1))
@@ -230,7 +233,7 @@ public Weapons getWeapon(){
   */
 	public void isInRoom(Boolean in, String roomName) {
 
-		this.inRoom = true;
+		this.inRoom = in;
 		this.roomName = roomName;
 	}
 	/**
@@ -240,6 +243,14 @@ public Weapons getWeapon(){
 	public boolean getSuggest() {
 
 		return this.suggest ;
+	}
+	/**
+	 * return the room the player is currently in
+	 * @return
+	 */
+	public String getRoomName(){
+
+		return this.roomName;
 	}
 	/**
 	 *  set the status of use as having suggested
