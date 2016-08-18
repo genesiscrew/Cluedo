@@ -527,7 +527,7 @@ public void movesuggestedWeapontoRoom(String Weapon, String roomtoMoveInto) {
 		for (Square a:s) {
 			if ( !match && a instanceof Room && ((Room) a).getFullName().equals(roomtoMoveInto) ) {
             String weaponName = Weapons.valueOf(Weapon).getVal();
-            Weapon weaponSquare = new Weapon(a.getX(),a.getY(),weaponName, roomtoMoveInto);
+            Weapon weaponSquare = new Weapon(a.getX(),a.getY(),weaponName, roomtoMoveInto, Weapons.valueOf(Weapon).ImageEnum());
             // update board
             match = true;
             this.getBoard().getSquares()[a.getX()][a.getY()] = weaponSquare;
@@ -620,6 +620,19 @@ public void removeWeaponsfromRoom() {
 }
 // move character token to room
 public void moveTokentoRoom(String suspectName, String roomtoMoveInto) {
+	// first we check if token already in board
+	for (Square[] s: this.getBoard().getSquares()) {
+		for (Square a:s) {
+			if ( a instanceof PlayerSquare && ((PlayerSquare) a).getFullName().equals(suspectName)) {
+				// we found matching token;
+                 Room room = ((PlayerSquare) a).getRoom();
+                 // we set it it back to a room object
+                 this.getBoard().getSquares()[a.getX()][a.getY()] = room;
+			}
+			}
+			}
+
+    // move token to specified room
 	for (Square[] s: this.getBoard().getSquares()) {
 		for (Square a:s) {
 			if (   a instanceof Room && ((Room) a).getFullName().equals(roomtoMoveInto)  && !a.isOccupied()) {
@@ -629,6 +642,7 @@ public void moveTokentoRoom(String suspectName, String roomtoMoveInto) {
 
                 PlayerSquare token = new PlayerSquare(cluedo.Player.Character.valueOf(suspectName).getNumVal(),a.getX(), a.getY(), cluedo.Player.Character.valueOf(suspectName).ImageEnum());
 	            // update board
+                token.setRoom((Room)a);
 	            this.getBoard().getSquares()[a.getX()][a.getY()] = token;
 	            return;
 				//break;

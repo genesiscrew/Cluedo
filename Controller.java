@@ -1,6 +1,8 @@
 package cluedo;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -11,8 +13,14 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.swing.AbstractButton;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
 
@@ -22,7 +30,7 @@ import cluedo.Player.Character;
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
-public class Controller implements ActionListener {
+public class Controller implements ActionListener  {
 	private static Runnable r;
 	private static Game game;
 	JFrame cb;
@@ -74,7 +82,7 @@ public class Controller implements ActionListener {
 				}
 			}
 		}
-		// check if
+		// check if user made suggestion or accusation
 		if (game.getStatus()) {
 			for (Component i : ((CluedoBoardWithColumnsAndRows) f).tools.getComponents()) {
 				if (i == e.getSource()) {
@@ -90,6 +98,34 @@ public class Controller implements ActionListener {
 				}
 			}
 		}
+
+		//check if user clicked on card image
+		JPanel test = null;
+		for (Component i : ((CluedoBoardWithColumnsAndRows) f).tools.getComponents()) {
+			if (i == e.getSource()) {
+			    JButton tmp = (JButton)i;
+			    ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
+			    Image image = tmpIcon.getImage();
+			   System.out.println(image.toString());
+			    Image biggerImage = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+			 JDialog dialog = new JDialog();     
+             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+             dialog.setTitle("Image Loading Demo");
+
+             dialog.add(new JLabel(new ImageIcon(biggerImage)));
+
+             dialog.pack();
+             dialog.setLocationByPlatform(true);
+             dialog.setVisible(true); 
+			
+			
+			 //((CluedoBoardWithColumnsAndRows) f).updateBoard(game.getPlayers().get(0));
+				//((CluedoBoardWithColumnsAndRows) f).drawBoard();
+
+			}
+			}
+
+
 	}
 
 	private Player getCurrentPlayer() {
@@ -389,7 +425,7 @@ public class Controller implements ActionListener {
 		// Draw Board
 		game.drawBoard();
 		((CluedoBoardWithColumnsAndRows) f).updateBoard(game.getPlayers().get(0));
-		((CluedoBoardWithColumnsAndRows) f).drawBoard();
+		//((CluedoBoardWithColumnsAndRows) f).drawBoard();
 
 		// shuffle the deck of cards
 		Collections.shuffle(game.getDeck().cards);
@@ -617,8 +653,8 @@ public class Controller implements ActionListener {
 		// we check if token is chosen by a player, if not we just move a token
 		// then, else we move an actual player there
 		if (suspect == null) {
-			System.out.println("token not chosen by player");
-			System.out.println(suspectName + roomName);
+			//token not chosen
+
 			game.moveTokentoRoom(suspectName, roomName);
 
 		} else {
@@ -626,9 +662,9 @@ public class Controller implements ActionListener {
 		}
 		game.movesuggestedWeapontoRoom(weapon, roomName);
 		game.updatePlayersonBoard();
-		game.drawBoard();
+		//game.drawBoard();
 		((CluedoBoardWithColumnsAndRows) f).updateBoard(p);
-		((CluedoBoardWithColumnsAndRows) f).drawBoard();
+		//((CluedoBoardWithColumnsAndRows) f).drawBoard();
 		// now we check with each user whether they have one or many
 		// of suggested cards
 
@@ -762,10 +798,10 @@ public class Controller implements ActionListener {
 					game.updatePlayersonBoard();
 					//
 
-					game.drawBoard();
+					//game.drawBoard();
 					((CluedoBoardWithColumnsAndRows) f).updateBoard(player);
-					((CluedoBoardWithColumnsAndRows) f).drawBoard();
-					System.out.println("board updated");
+					//((CluedoBoardWithColumnsAndRows) f).drawBoard();
+					//System.out.println("board updated");
 
 					coordinate = null;
 					// check if player is in room. if they are then stop

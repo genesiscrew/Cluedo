@@ -2,6 +2,8 @@ package cluedo;
 
 import java.awt.Image;
 
+import cluedo.Player.Character;
+
 public class PlayerSquare implements Square {
 
 	 private int x;
@@ -9,6 +11,7 @@ public class PlayerSquare implements Square {
 	  private int name;
 	  private Boolean notEmpty = true;
 	  private Image image;
+	  private Room room = null;
 
 		public PlayerSquare(int name, int x, int y, Image image) {
 			this.x = x;
@@ -17,12 +20,33 @@ public class PlayerSquare implements Square {
 			this.image = image;
 		}
 
+		public void  setRoom(Room room) {
+			this.room = room;
+
+		}
+		public Room getRoom() {
+			return this.room;
+
+		}
+
 
 
 	@Override
 	public String getName() {
 
 		return "|"+Integer.toString(name);
+	}
+
+	public String getFullName() {
+
+		for (Player.Character r : Character.values()) {
+			if (r.getNumVal() == this.name) {
+				return r.name();
+
+			}
+		}
+		return null;
+
 	}
 
 	public Image getImage() {
