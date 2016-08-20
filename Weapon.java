@@ -41,8 +41,8 @@ public class Weapon implements Square {
 
 			try {
 
-				return ImageIO
-						.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/tokens/weapontokens/" + this.a + ".png"));
+				return ImageIO.read(new File(System.getProperty("user.dir")
+						+ "/src/characterImages/images/tokens/weapontokens/" + this.a + ".png"));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

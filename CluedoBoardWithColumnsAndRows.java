@@ -8,13 +8,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
 
+import cluedo.Player.Character;
 import cluedo.Room.roomName;
+import cluedo.Weapon.Weapons;
 
 public class CluedoBoardWithColumnsAndRows extends JFrame {
 
@@ -29,6 +32,7 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 	private ArrayList<Image> emptytileImages = new ArrayList<Image>();
 	private ArrayList<Image> chosentileImages = new ArrayList<Image>();
 	private ArrayList<Image> ballRoomImages = new ArrayList<Image>();
+	private HashMap<String, Image> CardImages = new HashMap<String, Image>();
 	String text = "CLUEDO";
 	int textlen = text.length();
 	ArrayList<Color> colors = new ArrayList<>();
@@ -57,12 +61,16 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 
 	private String textBill;
 
+	private JFrame cardMenuFrame;
+
+	private JPanel cardMenuPanel;
+
 	public JButton[][] getGUIBoard() {
 
 		return this.cluedoBoardSquares;
 	}
 
-	CluedoBoardWithColumnsAndRows(Controller controller2) {
+	CluedoBoardWithColumnsAndRows(Controller controller2) throws IOException {
 		this.controller = controller2;
 		for (int i = 0; i < 15; i++) {
 			try {
@@ -81,15 +89,53 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 		colors.add(Color.GREEN);
 		colors.add(Color.YELLOW);
 
-		System.out.println("done");
+		// fill up hashmap with card images
+		for (int i = 0; i < 23; i++) {
+			if (i < 6) {
+
+				for (Character a : Character.values()) {
+
+					CardImages.put(a.toString(), ImageIO.read(new File(System.getProperty("user.dir")
+							+ "/src/characterImages/images/CardImages/" + a.toString() + ".jpg")));
+
+				}
+			} 
+			else if (i < 11) {
+				for (Weapons c : Weapons.values()) {
+					System.out.println(System.getProperty("user.dir")
+							+ "/src/characterImages/images/CardImages/" + c.toString() + ".png");
+					
+				}
+				for (Weapons c : Weapons.values()) {
+					
+					CardImages.put(c.toString(), ImageIO.read(new File(System.getProperty("user.dir")
+							+ "/src/characterImages/images/CardImages/" + c.toString() + ".png")));
+
+				}
+
+			} 
+			else {
+				for (roomName d: roomName.values()) {
+					if (!d.toString().equals("Center")) {
+					System.out.println(d.toString());
+					CardImages.put(d.toString(), ImageIO.read(new File(System.getProperty("user.dir")
+							+ "/src/characterImages/images/CardImages/" + d.toString() + ".png")));
+					}
+				}
+				
+				
+			}
+
+		}
+
 		initializeGui();
 
 	}
 
 	public void drawBoard() {
 
-		//this.picLabel.repaint();
-		//this.gui.repaint();
+		// this.picLabel.repaint();
+		// this.gui.repaint();
 	}
 
 	public final void initializeGui() {
@@ -417,6 +463,95 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 		picLabel.add(cluedoBoard);
 
 		gui.add(picLabel);
+
+	}
+
+	public int makeSuggestion() {
+		JFrame frame = new JFrame("example");
+		// JPanel pan = new JPanel();
+		// pan.setLayout(new FlowLayout());
+
+		// pan.add(new JLabel("Would you like to suggest?"));
+
+		Object[] options = { "Yes, please", "No way!" };
+		int n = JOptionPane.showOptionDialog(frame, "Would you like green eggs and ham?", "A Silly Question",
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]); // default
+																										// button
+																										// title
+		System.out.println(n);
+		/*
+		 * JButton yes = new JButton("Yes"); JButton no = new JButton("No");
+		 * yes.setEnabled(true); no.setEnabled(true); yes.setBounds(10, 10, 40,
+		 * 40); no.setBounds(10, 10, 40, 40);
+		 * yes.addActionListener(this.controller);
+		 * no.addActionListener(this.controller); // pan.add(yes); //
+		 * pan.add(no); JDialog jd = new JDialog(); jd.setLayout(new
+		 * GridLayout(0, 2)); jd.add(yes); jd.add(no); jd.setSize(200, 200);
+		 * 
+		 * jd.setFocusable(true);
+		 * 
+		 * return jd;
+		 */
+
+		return n;
+	}
+
+	public void CardMenuCreate() {
+
+		cardMenuPanel = new JPanel(new FlowLayout());
+		cardMenuPanel.setForeground(Color.black);
+		cardMenuPanel.setBackground(Color.white);
+		Image image = null;
+
+		// first line
+
+		cardMenuPanel.setOpaque(true);
+
+		try {
+			image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/" + "1.jpg"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Image scaled = image.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
+		JButton pic = new JButton(new ImageIcon(scaled));
+		pic.setName("image");
+
+		JLabel label1 = new JLabel("Centered Text");
+		label1.setForeground(Color.GREEN);
+		label1.setFont(new Font("SansSerif", Font.BOLD, 6));
+		label1.setAlignmentX(0.5f);
+		label1.setAlignmentY(0.5f);
+
+		Insets buttonMargin = new Insets(5, 5, 5, 5);
+		pic.setMargin(buttonMargin);
+		pic.setBounds(0, 0, 0, 0);
+		pic.addActionListener(this.controller);
+		pic.setFocusable(true);
+		pic.setAlignmentX(0.5f);
+		pic.setAlignmentY(0.5f);
+
+		cardMenuPanel.add(pic);
+		cardMenuPanel.add(label1);
+
+		cardMenuFrame = new JFrame();
+		cardMenuFrame.setLocationByPlatform(true);
+		cardMenuFrame.setSize(200, 200);
+		cardMenuFrame.pack();
+		// cardMenu.add(jp1);
+		cardMenuFrame.getContentPane().add(cardMenuPanel);
+		pic.requestFocusInWindow();
+
+	}
+
+	public JPanel getCardMenuPanel() {
+		return this.cardMenuPanel;
+
+	}
+
+	public JFrame getCardMenuFrame() {
+		return this.cardMenuFrame;
 
 	}
 
@@ -778,7 +913,7 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 		}
 
 		cluedoBoard.revalidate();
-		//cluedoBoard.repaint();
+		// cluedoBoard.repaint();
 
 	}
 

@@ -1,18 +1,28 @@
 package cluedo;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -20,8 +30,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
 
 import org.junit.experimental.theories.Theories;
@@ -30,19 +43,23 @@ import cluedo.Player.Character;
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
-public class Controller implements ActionListener  {
+public class Controller implements ActionListener{
 	private static Runnable r;
 	private static Game game;
 	JFrame cb;
 	private static JFrame f;
 	private int x;
-	private boolean suggestRequest;
+	private static boolean suggestRequest;
 	private static Player currentPlayer;
 	private static boolean moveRequest = false;
 	private static Position coordinate;
 	private static boolean ended = false;
 	private static int diceRoll = 0;
 	private static boolean accuseRequest;
+	private static int cardsSelected = 0;
+	private static boolean suggestAccepted;
+	private static int suggesting = -1;
+	private static JFrame cardMenuFrame;
 
 	public Game getGame() {
 
@@ -86,12 +103,11 @@ public class Controller implements ActionListener  {
 		if (game.getStatus()) {
 			for (Component i : ((CluedoBoardWithColumnsAndRows) f).tools.getComponents()) {
 				if (i == e.getSource()) {
+
 					JButton b = (JButton) i;
 					String buttonType = b.getText();
 
-					if (buttonType.equals("Suggest") && !accuseRequest) {
-
-					} else if (buttonType.equals("Accuse") && !suggestRequest) {
+					if (buttonType.equals("Accuse") && !suggestRequest) {
 						Player p = this.getCurrentPlayer();
 						this.makeAccusation(p, game);
 					}
@@ -99,32 +115,37 @@ public class Controller implements ActionListener  {
 			}
 		}
 
-		//check if user clicked on card image
+		for (Component w : ((CluedoBoardWithColumnsAndRows) f).getCardMenuPanel().getComponents() ) {
+		  System.out.println(w.getName());
+		  System.out.println(w.getClass());
+			if (e.getSource() == w) {
+				System.out.println("yeah boi");
+				cardsSelected++;
+			}
+
+		}
+
+		// check if user clicked on card image
 		JPanel test = null;
 		for (Component i : ((CluedoBoardWithColumnsAndRows) f).tools.getComponents()) {
 			if (i == e.getSource()) {
-			    JButton tmp = (JButton)i;
-			    ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
-			    Image image = tmpIcon.getImage();
-			   System.out.println(image.toString());
-			    Image biggerImage = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-			 JDialog dialog = new JDialog();     
-             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-             dialog.setTitle("Image Loading Demo");
+				JButton tmp = (JButton) i;
+				ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
+				Image image = tmpIcon.getImage();
+				//System.out.println(image.toString());
+				Image biggerImage = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+				JDialog dialog = new JDialog();
+				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				dialog.setTitle("Image Loading Demo");
 
-             dialog.add(new JLabel(new ImageIcon(biggerImage)));
+				dialog.add(new JLabel(new ImageIcon(biggerImage)));
 
-             dialog.pack();
-             dialog.setLocationByPlatform(true);
-             dialog.setVisible(true); 
-			
-			
-			 //((CluedoBoardWithColumnsAndRows) f).updateBoard(game.getPlayers().get(0));
-				//((CluedoBoardWithColumnsAndRows) f).drawBoard();
+				dialog.pack();
+				dialog.setLocationByPlatform(true);
+				dialog.setVisible(true);
 
 			}
-			}
-
+		}
 
 	}
 
@@ -378,6 +399,11 @@ public class Controller implements ActionListener  {
 		// f.setResizable(false);
 		controller.f.setVisible(true);
 		controller.f.repaint();
+		//create card menu
+	  ((CluedoBoardWithColumnsAndRows) controller.f).CardMenuCreate();
+	  // assign card menu to variable
+		cardMenuFrame = ((CluedoBoardWithColumnsAndRows) controller.f).getCardMenuFrame();
+
 
 		// Print banner ;)
 		System.out.println(
@@ -425,7 +451,8 @@ public class Controller implements ActionListener  {
 		// Draw Board
 		game.drawBoard();
 		((CluedoBoardWithColumnsAndRows) f).updateBoard(game.getPlayers().get(0));
-		//((CluedoBoardWithColumnsAndRows) f).drawBoard();
+	
+		// ((CluedoBoardWithColumnsAndRows) f).drawBoard();
 
 		// shuffle the deck of cards
 		Collections.shuffle(game.getDeck().cards);
@@ -495,8 +522,46 @@ public class Controller implements ActionListener  {
 					// if player in room, and did not suggest, make him suggest
 					if (p.inRoom() && !p.getSuggest() && p.InGame) {
 						// ask user if he would like to make suggestion
+						suggesting = ((CluedoBoardWithColumnsAndRows) controller.f).makeSuggestion();
+						// suggesting.setVisible(true);
+						// suggesting.requestFocus();
+
+						while (suggesting == -1) {
+							/* System.out.println("waiting for input"); */
+							try {
+								Thread.sleep(25);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						}
+
+						if (suggesting == 0) {
+							/*JFrame frame = new JFrame();
+							frame.setLocationByPlatform(true);
+							frame.pack();
+							frame.add(cards);
+							frame.setVisible(true); */
+							suggestRequest = true;
+							
+							cardMenuFrame.setVisible(true);
+						}
+
+						while (cardsSelected <= 3) {
+							//System.out.println("waiting for input");
+							try {
+								Thread.sleep(25);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						System.out.println("three cards chosen");
+
 						String ask = inputString(p.getName() + ", would you like to make a suggestion? Enter Y or N");
 						if (ask.equalsIgnoreCase("Y")) {
+
 							ArrayList<String> suggestionList = makeSuggestion(p, game);
 							// if the user suggested, present(if any) the found
 							// suggestions
@@ -524,7 +589,7 @@ public class Controller implements ActionListener  {
 						}
 						// turn has finished, so we reset all weapon squares
 						game.removeWeaponsfromRoom();
-						System.out.println("we reach here");
+						//System.out.println("we reach here");
 						p.resetVisitedSquares();
 						p.setSuggest(false);
 					}
@@ -653,7 +718,7 @@ public class Controller implements ActionListener  {
 		// we check if token is chosen by a player, if not we just move a token
 		// then, else we move an actual player there
 		if (suspect == null) {
-			//token not chosen
+			// token not chosen
 
 			game.moveTokentoRoom(suspectName, roomName);
 
@@ -662,9 +727,9 @@ public class Controller implements ActionListener  {
 		}
 		game.movesuggestedWeapontoRoom(weapon, roomName);
 		game.updatePlayersonBoard();
-		//game.drawBoard();
+		// game.drawBoard();
 		((CluedoBoardWithColumnsAndRows) f).updateBoard(p);
-		//((CluedoBoardWithColumnsAndRows) f).drawBoard();
+		// ((CluedoBoardWithColumnsAndRows) f).drawBoard();
 		// now we check with each user whether they have one or many
 		// of suggested cards
 
@@ -758,7 +823,7 @@ public class Controller implements ActionListener  {
 							diceRoll = 0;
 
 							System.out.println(
-							player.getName() + ", you have entered the " + ((Room) newSquare).getFullName());
+									player.getName() + ", you have entered the " + ((Room) newSquare).getFullName());
 							player.isInRoom(true, ((Room) newSquare).getFullName());
 
 						}
@@ -769,7 +834,7 @@ public class Controller implements ActionListener  {
 					if (player.inRoom() && oldSquare instanceof Room && newSquare instanceof Door) {
 
 						System.out.println(
-						player.getName() + ", you have exited the " + ((Room) oldSquare).getFullName());
+								player.getName() + ", you have exited the " + ((Room) oldSquare).getFullName());
 						player.isInRoom(false, "");
 					}
 					boolean tunneled = false;
@@ -798,10 +863,10 @@ public class Controller implements ActionListener  {
 					game.updatePlayersonBoard();
 					//
 
-					//game.drawBoard();
+					// game.drawBoard();
 					((CluedoBoardWithColumnsAndRows) f).updateBoard(player);
-					//((CluedoBoardWithColumnsAndRows) f).drawBoard();
-					//System.out.println("board updated");
+					// ((CluedoBoardWithColumnsAndRows) f).drawBoard();
+					// System.out.println("board updated");
 
 					coordinate = null;
 					// check if player is in room. if they are then stop
@@ -816,7 +881,7 @@ public class Controller implements ActionListener  {
 				// }
 			} else {
 				System.out.println("Turn for " + player.getName() + " has ended");
-				//player.resetVisitedSquares();
+				// player.resetVisitedSquares();
 				ended = true;
 				if (!player.inRoom) {
 					return true;
@@ -844,5 +909,7 @@ public class Controller implements ActionListener  {
 		this.coordinate = new Position(ii, jj);
 
 	}
+
+	
 
 }
