@@ -21,27 +21,27 @@ public class Deck {
  */
    public Deck() throws IOException{
 
-	    cards.add(new Card("MissScarlet", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/scarlet.jpg"))));
-		cards.add(new Card("ColonelMustard", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/mustard.jpg"))));
-		cards.add(new Card("MrsWhite", "Character",ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/white.jpg"))));
-		cards.add(new Card("TheReverendGreen", "Character",ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/green.jpg"))));
-		cards.add(new Card("MrsPeacock", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/peacock.jpg"))));
-		cards.add(new Card("ProfessorPlum", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/plum.jpg"))));
+	    cards.add(new Card("MissScarlet", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/MissScarlet.jpg"))));
+		cards.add(new Card("ColonelMustard", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/ColonelMustard.jpg"))));
+		cards.add(new Card("MrsWhite", "Character",ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/MrsWhite.jpg"))));
+		cards.add(new Card("TheReverendGreen", "Character",ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/TheReverendGreen.jpg"))));
+		cards.add(new Card("MrsPeacock", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/MrsPeacock.jpg"))));
+		cards.add(new Card("ProfessorPlum", "Character", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/characters" + "/ProfessorPlum.jpg"))));
 		cards.add(new Card("Rope", "Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/Rope.png"))));
 		cards.add(new Card("Candlestick","Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/Candlestick.png"))));
 		cards.add(new Card("Revolver", "Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/Revolver.png"))));
-		cards.add(new Card ("Lead Pipe", "Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/Pipe.png"))));
+		cards.add(new Card ("LeadPipe", "Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/LeadPipe.png"))));
 		cards.add(new Card ("Spanner", "Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/Spanner.png"))));
-		cards.add(new Card ("Dagger", "Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/Dagger.jpg"))));
+		cards.add(new Card ("Dagger", "Weapon", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/weapons" + "/Dagger.png"))));
 		cards.add(new Card ("Kitchen", "Room",  ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/Kitchen.png"))));
-		cards.add(new Card ("Dining Room", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/dining.png"))));
-		cards.add(new Card ("Lounge", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/lounge.png"))));
-		cards.add(new Card ("Ball Room", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/ball.png"))));
-		cards.add(new Card ("Billiard Room", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/billiard.png"))));
-		cards.add(new Card ("Library", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/library.png"))));
-		cards.add(new Card ("Hall", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/hall.png"))));
-		cards.add(new Card ("Conservatory", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/conservatory.png"))));
-		cards.add(new Card ("Study", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/study.png"))));
+		cards.add(new Card ("DiningRoom", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/DiningRoom.png"))));
+		cards.add(new Card ("Lounge", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/Lounge.png"))));
+		cards.add(new Card ("BallRoom", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/Ballroom.png"))));
+		cards.add(new Card ("BilliardRoom", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/BilliardRoom.png"))));
+		cards.add(new Card ("Library", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/Library.png"))));
+		cards.add(new Card ("Hall", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/Hall.png"))));
+		cards.add(new Card ("Conservatory", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/Conservatory.png"))));
+		cards.add(new Card ("Study", "Room", ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/rooms" + "/Study.png"))));
 
 
    }

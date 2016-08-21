@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.zip.CheckedOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
@@ -31,6 +32,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
@@ -43,12 +45,14 @@ import cluedo.Player.Character;
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
-public class Controller implements ActionListener{
+public class Controller implements ActionListener {
 	private static Runnable r;
 	private static Game game;
 	JFrame cb;
-	private static JFrame f;
+	private static View GUI;
 	private int x;
+	private static String chosenSuggestedCard;
+	private static boolean suggestionComplete;
 	private static boolean suggestRequest;
 	private static Player currentPlayer;
 	private static boolean moveRequest = false;
@@ -59,7 +63,14 @@ public class Controller implements ActionListener{
 	private static int cardsSelected = 0;
 	private static boolean suggestAccepted;
 	private static int suggesting = -1;
-	private static JFrame cardMenuFrame;
+	private static JFrame characterCardMenuFrame;
+	private static String suspectName;
+	private static String weapon;
+	private static String room;
+	private static JFrame weaponCardMenuFrame;
+	private static JFrame roomCardMenuFrame;
+	private static ArrayList<String> suggestionList = new ArrayList<String>();
+	private static int accuseDecision = -1;
 
 	public Game getGame() {
 
@@ -88,9 +99,9 @@ public class Controller implements ActionListener{
 
 		// check if tile pressed in board. if so send coordinates
 
-		for (int i = 0; i < ((CluedoBoardWithColumnsAndRows) f).getGUIBoard().length; i++) {
-			for (int j = 0; j < ((CluedoBoardWithColumnsAndRows) f).getGUIBoard()[i].length; j++) {
-				if (((CluedoBoardWithColumnsAndRows) f).getGUIBoard()[i][j] == e.getSource()) {
+		for (int i = 0; i < GUI.getGUIBoard().length; i++) {
+			for (int j = 0; j < GUI.getGUIBoard()[i].length; j++) {
+				if (GUI.getGUIBoard()[i][j] == e.getSource()) {
 					this.sendCoordinates(i, j);
 					// confirmed one of the buttons in our tile arrrat has been
 					// pressed
@@ -101,7 +112,7 @@ public class Controller implements ActionListener{
 		}
 		// check if user made suggestion or accusation
 		if (game.getStatus()) {
-			for (Component i : ((CluedoBoardWithColumnsAndRows) f).tools.getComponents()) {
+			for (Component i : GUI.tools.getComponents()) {
 				if (i == e.getSource()) {
 
 					JButton b = (JButton) i;
@@ -114,35 +125,78 @@ public class Controller implements ActionListener{
 				}
 			}
 		}
+		// get character suggestion cards
+		for (Component w : GUI.getCharacterCardMenuPanel().getComponents()) {
 
-		for (Component w : ((CluedoBoardWithColumnsAndRows) f).getCardMenuPanel().getComponents() ) {
-		  System.out.println(w.getName());
-		  System.out.println(w.getClass());
 			if (e.getSource() == w) {
-				System.out.println("yeah boi");
-				cardsSelected++;
+				System.out.println(cardsSelected);
+				// get the name of card
+				if (cardsSelected == 0) {
+					suspectName = w.getName();
+
+					cardsSelected++;
+				}
+			}
+
+		}
+		// getting weapon card
+		for (Component w : GUI.getWeaponCardMenuPanel().getComponents()) {
+
+			if (e.getSource() == w) {
+
+				// get the name of card
+				if (cardsSelected == 1) {
+					System.out.println("i does here");
+					weapon = w.getName();
+					cardsSelected++;
+				}
+			}
+
+		}
+		// get room card
+		for (Component w : GUI.getRoomCardMenuPanel().getComponents()) {
+
+			if (e.getSource() == w) {
+
+				// get the name of card
+				if (cardsSelected == 2) {
+					room = w.getName();
+					cardsSelected++;
+				}
 			}
 
 		}
 
-		// check if user clicked on card image
+		// check if user clicked on card image suggested
 		JPanel test = null;
-		for (Component i : ((CluedoBoardWithColumnsAndRows) f).tools.getComponents()) {
+		for (Component i : GUI.tools.getComponents()) {
 			if (i == e.getSource()) {
+
 				JButton tmp = (JButton) i;
+
+				if (!suggestionComplete && !suggestionList.isEmpty()) {
+
+					if (suggestionList.contains(tmp.getName())) {
+
+						chosenSuggestedCard = tmp.getName();
+						suggestionComplete = true;
+					}
+				}
+
 				ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
-				Image image = tmpIcon.getImage();
-				//System.out.println(image.toString());
-				Image biggerImage = image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-				JDialog dialog = new JDialog();
-				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-				dialog.setTitle("Image Loading Demo");
-
-				dialog.add(new JLabel(new ImageIcon(biggerImage)));
-
-				dialog.pack();
-				dialog.setLocationByPlatform(true);
-				dialog.setVisible(true);
+				/*
+				 * Image image = tmpIcon.getImage(); //
+				 * System.out.println(image.toString()); Image biggerImage =
+				 * image.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+				 * JDialog dialog = new JDialog();
+				 * dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				 * dialog.setTitle("Image Loading Demo");
+				 *
+				 * dialog.add(new JLabel(new ImageIcon(biggerImage)));
+				 *
+				 * dialog.pack(); dialog.setLocationByPlatform(true);
+				 * dialog.setVisible(true);
+				 */
 
 			}
 		}
@@ -384,62 +438,29 @@ public class Controller implements ActionListener{
 			e.printStackTrace();
 		}
 
-		controller.f = new CluedoBoardWithColumnsAndRows(controller);
+		controller.GUI = new View(controller);
 
-		controller.f.add(((CluedoBoardWithColumnsAndRows) controller.f).getGui());
-		controller.f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		controller.f.setLocationByPlatform(true);
+		controller.GUI.add((controller.GUI).getGui());
+		controller.GUI.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		controller.GUI.setLocationByPlatform(true);
 
 		// ensures the frame is the minimum size it needs to be
 		// in order display the components within it
 
-		controller.f.pack();
+		controller.GUI.pack();
 		// ensures the minimum size is enforced.
-		controller.f.setSize(1024, 768);
+		controller.GUI.setSize(1248, 768);
 		// f.setResizable(false);
-		controller.f.setVisible(true);
-		controller.f.repaint();
-		//create card menu
-	  ((CluedoBoardWithColumnsAndRows) controller.f).CardMenuCreate();
-	  // assign card menu to variable
-		cardMenuFrame = ((CluedoBoardWithColumnsAndRows) controller.f).getCardMenuFrame();
-
-
-		// Print banner ;)
-		System.out.println(
-				"CCCCCCCCCCCCCLLLLLLLLLLL            UUUUUUUU     UUUUUUUUEEEEEEEEEEEEEEEEEEEEEEDDDDDDDDDDDDD             OOOOOOOOO");
-		System.out.println(
-				"CCC::::::::::::CL:::::::::L            U::::::U     U::::::UE::::::::::::::::::::ED::::::::::::DDD        OO:::::::::OO");
-		System.out.println(
-				"CC:::::::::::::::CL:::::::::L            U::::::U     U::::::UE::::::::::::::::::::ED:::::::::::::::DD    OO:::::::::::::OO");
-		System.out.println(
-				"C:::::CCCCCCCC::::CLL:::::::LL            UU:::::U     U:::::UUEE::::::EEEEEEEEE::::EDDD:::::DDDDD:::::D  O:::::::OOO:::::::O");
-		System.out.println(
-				"C:::::C       CCCCCC  L:::::L               U:::::U     U:::::U   E:::::E       EEEEEE  D:::::D    D:::::D O::::::O   O::::::O");
-		System.out.println(
-				"C:::::C                L:::::L               U:::::D     D:::::U   E:::::E               D:::::D     D:::::DO:::::O     O:::::O");
-		System.out.println(
-				"C:::::C                L:::::L               U:::::D     D:::::U   E::::::EEEEEEEEEE     D:::::D     D:::::DO:::::O     O:::::O");
-		System.out.println(
-				"C:::::C                L:::::L               U:::::D     D:::::U   E:::::::::::::::E     D:::::D     D:::::DO:::::O     O:::::O");
-		System.out.println(
-				"C:::::C                L:::::L               U:::::D     D:::::U   E:::::::::::::::E     D:::::D     D:::::DO:::::O     O:::::O");
-		System.out.println(
-				"C:::::C                L:::::L               U:::::D     D:::::U   E::::::EEEEEEEEEE     D:::::D     D:::::DO:::::O     O:::::O");
-		System.out.println(
-				"C:::::C                L:::::L               U:::::D     D:::::U   E:::::E               D:::::D     D:::::DO:::::O     O:::::O");
-		System.out.println(
-				"C:::::C       CCCCCC  L:::::L         LLLLLLU::::::U   U::::::U   E:::::E       EEEEEE  D:::::D    D:::::D O::::::O   O::::::O");
-		System.out.println(
-				"C:::::CCCCCCCC::::CLL:::::::LLLLLLLLL:::::LU:::::::UUU:::::::U EE::::::EEEEEEEE:::::EDDD:::::DDDDD:::::D  O:::::::OOO:::::::O");
-		System.out.println(
-				"CC:::::::::::::::CL::::::::::::::::::::::L UU:::::::::::::UU  E::::::::::::::::::::ED:::::::::::::::DD    OO:::::::::::::OO");
-		System.out.println(
-				"CCC::::::::::::CL::::::::::::::::::::::L   UU:::::::::UU    E::::::::::::::::::::ED::::::::::::DDD        OO:::::::::OO");
-		System.out.println(
-				"CCCCCCCCCCCCCLLLLLLLLLLLLLLLLLLLLLLLL     UUUUUUUUU      EEEEEEEEEEEEEEEEEEEEEEDDDDDDDDDDDDD             OOOOOOOOO");
-		System.out.println("2016 All Rights Persevered");
-		System.out.println("By Hamid Abubakr");
+		controller.GUI.setVisible(true);
+		controller.GUI.repaint();
+		// initialize card menu frames
+		controller.GUI.characterCardMenuCreate();
+		controller.GUI.weaponCardMenuCreate();
+		controller.GUI.roomCardMenuCreate();
+		// assign card menus to variables
+		characterCardMenuFrame = controller.GUI.getCharacterCardMenuFrame();
+		weaponCardMenuFrame = controller.GUI.getWeaponCardMenuFrame();
+		roomCardMenuFrame = controller.GUI.getRoomCardMenuFrame();
 
 		// input player info and position players on the board
 		int nplayers1 = 0;
@@ -447,12 +468,10 @@ public class Controller implements ActionListener{
 			nplayers1 = inputNumber("How many players? Minimum of 3");
 		}
 		ArrayList<Player> players = inputPlayers(nplayers1, game);
-		// game.updatePlayersonBoard();
+
 		// Draw Board
 		game.drawBoard();
-		((CluedoBoardWithColumnsAndRows) f).updateBoard(game.getPlayers().get(0));
-	
-		// ((CluedoBoardWithColumnsAndRows) f).drawBoard();
+		GUI.updateBoard(game.getPlayers().get(0), game.getPlayers().get(0).getName() + "'s turn to play");
 
 		// shuffle the deck of cards
 		Collections.shuffle(game.getDeck().cards);
@@ -479,9 +498,9 @@ public class Controller implements ActionListener{
 					diceRoll = rand.nextInt(12);
 
 					if (diceRoll < 2) {
-
 						diceRoll = 2;
 					}
+
 					boolean moved = false;
 					// here we interact with the player to move him/her on the
 					// board
@@ -491,6 +510,18 @@ public class Controller implements ActionListener{
 						// first we ask if user wants to accuse
 
 						// makeAccusation(p, game);
+						
+						/*
+						 * while (accuseDecision == -1) {
+						 * 
+						 * try { Thread.sleep(25); } catch (InterruptedException
+						 * e) {
+						 * 
+						 * e.printStackTrace(); }
+						 * 
+						 * }
+						 */
+						
 						// is user still in game?
 						if (p.InGame) {
 							// user has to move
@@ -500,7 +531,7 @@ public class Controller implements ActionListener{
 								try {
 									Thread.sleep(25);
 								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
+
 									e.printStackTrace();
 								}
 							}
@@ -522,82 +553,84 @@ public class Controller implements ActionListener{
 					// if player in room, and did not suggest, make him suggest
 					if (p.inRoom() && !p.getSuggest() && p.InGame) {
 						// ask user if he would like to make suggestion
-						suggesting = ((CluedoBoardWithColumnsAndRows) controller.f).makeSuggestion();
-						// suggesting.setVisible(true);
-						// suggesting.requestFocus();
+						suggesting = controller.GUI.makeSuggestion(p);
+						// wait untill player makes
+						/*while (suggesting == -1) {
 
-						while (suggesting == -1) {
-							/* System.out.println("waiting for input"); */
 							try {
 								Thread.sleep(25);
 							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
+
 								e.printStackTrace();
 							}
 
 						}
-
+*/
+						System.out.println(suggesting);
 						if (suggesting == 0) {
-							/*JFrame frame = new JFrame();
-							frame.setLocationByPlatform(true);
-							frame.pack();
-							frame.add(cards);
-							frame.setVisible(true); */
+							// we show up the character card menu and set
+							// suggestion mode to true
 							suggestRequest = true;
-							
-							cardMenuFrame.setVisible(true);
-						}
+							characterCardMenuFrame.setVisible(true);
 
-						while (cardsSelected <= 3) {
-							//System.out.println("waiting for input");
-							try {
-								Thread.sleep(25);
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						System.out.println("three cards chosen");
-
-						String ask = inputString(p.getName() + ", would you like to make a suggestion? Enter Y or N");
-						if (ask.equalsIgnoreCase("Y")) {
-
-							ArrayList<String> suggestionList = makeSuggestion(p, game);
-							// if the user suggested, present(if any) the found
-							// suggestions
-							if (p.getSuggest()) {
-								presentSuggestions(p, suggestionList);
-								// now we offer him to make accusation
-								// makeAccusation(p, game);
-							}
-							// after he suggests, ask if he wants to
-							// player does not want to suggest, so we just move
-							// him
-						} else {
-							if (!moved) {
-								while (diceRoll > 0 && !ended) {
-									if (movePlayer(p, game)) {
-										System.out.println("player moved");
-										diceRoll--;
-
-									}
+							while (cardsSelected < 2) {
+								if (cardsSelected == 1) {
+									characterCardMenuFrame.setVisible(false);
+									weaponCardMenuFrame.setVisible(true);
 								}
-								moved = true;
-								ended = false;
-								p.resetVisitedSquares();
+
+								try {
+									Thread.sleep(25);
+								} catch (InterruptedException e) {
+
+									e.printStackTrace();
+								}
 							}
+
+							weaponCardMenuFrame.setVisible(false);
+							System.out.println("three cards chosen");
+							cardsSelected = 0;
+						
+
+						ArrayList<String> suggestionList = makeSuggestion(p, game);
+						// if the user suggested, present(if any) the found
+						// suggestions
+						if (p.getSuggest()) {
+							presentSuggestions(p, suggestionList);
+							// now we offer him to make accusation
+							// makeAccusation(p, game);
 						}
-						// turn has finished, so we reset all weapon squares
-						game.removeWeaponsfromRoom();
-						//System.out.println("we reach here");
-						p.resetVisitedSquares();
-						p.setSuggest(false);
 					}
+						
+					} 
+					// after he suggests/or not, ask if he wants to
+					// player does not want to suggest, so we just move
+					// him
+					else {
+						if (!moved) {
+							while (diceRoll > 0 && !ended) {
+								if (movePlayer(p, game)) {
+									System.out.println("player moved");
+									diceRoll--;
 
+								}
+							}
+							moved = true;
+							ended = false;
+							p.resetVisitedSquares();
+						}
+					}
+					// turn has finished, so we reset all weapon squares
+					game.removeWeaponsfromRoom();
+
+					p.resetVisitedSquares();
+					p.setSuggest(false);
 				}
-			}
 
+			}
 		}
+
+		// }
 
 	}
 
@@ -608,49 +641,68 @@ public class Controller implements ActionListener{
 	 * @param game
 	 */
 	private static void makeAccusation(Player p, Game game) {
-		String acuse = inputString(p.getName() + ", would you like to make an accusation? Enter Y or N");
-		if (acuse.equalsIgnoreCase("Y")) {
-			// we make accusation
-			System.out.println("Please select a suspect");
-			String suspect = null;
-			String weapon = null;
-			String room = null;
-			try {
-				suspect = characterList();
-				weapon = weaponList();
-				room = roomList();
-			} catch (Exception e) {
-				System.out.println("Invalid Input");
+		// String acuse = inputString(p.getName() + ", would you like to make an
+		// accusation? Enter Y or N");
+		// if (acuse.equalsIgnoreCase("Y")) {
+		// we make accusation
+		accuseDecision = GUI.makeAccusation(p);
+		System.out.println(accuseDecision);
+		if (accuseDecision == 0) {
+			// we show up the character card menu and set
+			// suggestion mode to true
+			accuseRequest = true;
+			characterCardMenuFrame.setVisible(true);
 
+			while (cardsSelected < 3) {
+				if (cardsSelected == 1) {
+					characterCardMenuFrame.setVisible(false);
+					weaponCardMenuFrame.setVisible(true);
+				} else if (cardsSelected == 2) {
+					weaponCardMenuFrame.setVisible(false);
+					roomCardMenuFrame.setVisible(true);
+				}
+
+				try {
+					Thread.sleep(25);
+				} catch (InterruptedException e) {
+
+					e.printStackTrace();
+				}
 			}
+			roomCardMenuFrame.setVisible(false);
+			System.out.println("three cards chosen");
 
-			// next , we check with game whether accusations are valid
-			boolean accusation = game.checkAccusation(suspect, weapon, room);
-			if (accusation) {
-				System.out.println();
-				System.out.println();
-				System.out.println(
-						"*******************************************************************************************");
-				System.out.println(
-						"*******************************************************************************************");
-				System.out.println(
-						"*******************************************************************************************");
-				System.out.println(
-						"Congratulations, " + p.getName() + ",  your accusations were right!! You have won the game!!");
-				System.out.println(
-						"*******************************************************************************************");
-				System.out.println(
-						"********************************************************************************************");
-				System.out.println(
-						"*******************************************************************************************");
-
-			} else {
-				// player has failed accusation, he will now be spectator
-				p.InGame = false;
-				System.out.println("Your accusations were wrong, " + p.getName() + ", you are out of the game");
-
-			}
+			cardsSelected = 0;
 		}
+
+		
+		// next , we check with game whether accusations are valid
+		boolean accusation = game.checkAccusation(suspectName, weapon, room);
+		if (accusation) {
+			System.out.println();
+			System.out.println();
+			System.out.println(
+					"*******************************************************************************************");
+			System.out.println(
+					"*******************************************************************************************");
+			System.out.println(
+					"*******************************************************************************************");
+			System.out.println(
+					"Congratulations, " + p.getName() + ",  your accusations were right!! You have won the game!!");
+			System.out.println(
+					"*******************************************************************************************");
+			System.out.println(
+					"********************************************************************************************");
+			System.out.println(
+					"*******************************************************************************************");
+
+		} else {
+			// player has failed accusation, he will now be spectator
+			p.InGame = false;
+			System.out.println("Your accusations were wrong, " + p.getName() + ", you are out of the game");
+
+		}
+		// }
 		accuseRequest = false;
 
 	}
@@ -667,11 +719,15 @@ public class Controller implements ActionListener{
 			System.out.println("We found no matching suggestions with any other players!!");
 		} else {
 			// display what we found with other players
-			System.out.println();
-			System.out.println(p.getName() + ", we found the following suggestions with other players");
-			for (String found : suggestionList) {
-				System.out.println(found);
+			String suggestString = p.getName() + ", we found the following suggestions with other players";
+			int count = 1;
+			for (String suggestion : suggestionList) {
+				suggestString += "\n";
+				suggestString += (count + ":  " + suggestion);
+				count++;
 			}
+
+			JOptionPane.showMessageDialog(GUI, suggestString);
 
 		}
 
@@ -689,19 +745,19 @@ public class Controller implements ActionListener{
 	 */
 	private static ArrayList<String> makeSuggestion(Player p, Game game) {
 		ArrayList<String> totSuggestions = new ArrayList<String>();
-		String suspectName = null;
+		// suspectName = null;
 		Player suspect = null;
-		String weapon = null;
+		// weapon = null;
 
 		p.setSuggest(true);
 		try {
 			System.out.println(p.getName() + ", its  time for you to give us some suggestions!");
 			// suspectName = inputString(p.getName() + ", please enter the
 			// Character name of your suspect");
-			suspectName = characterList();
+			// suspectName = characterList();
 			// token = Player.Character.valueOf(tokenName);
 			suspect = game.getPlayerfromCharacter(suspectName);
-			weapon = weaponList();
+			// weapon = weaponList();
 		} catch (Exception e) {
 			System.out.println("Invalid Input");
 
@@ -728,7 +784,7 @@ public class Controller implements ActionListener{
 		game.movesuggestedWeapontoRoom(weapon, roomName);
 		game.updatePlayersonBoard();
 		// game.drawBoard();
-		((CluedoBoardWithColumnsAndRows) f).updateBoard(p);
+		GUI.updateBoard(p, null);
 		// ((CluedoBoardWithColumnsAndRows) f).drawBoard();
 		// now we check with each user whether they have one or many
 		// of suggested cards
@@ -739,18 +795,42 @@ public class Controller implements ActionListener{
 				// System.out.println("It is now " + e.getName() + "'s turn to
 				// play");
 				// we store what we find from each player into here
-				ArrayList<String> suggestions = game.checkSuggestion(e, suspectName, weapon, roomName);
-				if (suggestions.size() > 0) {
+				suggestionList = game.checkSuggestion(e, suspectName, weapon, roomName);
+				String suggestString = null;
+				if (suggestionList.size() > 0) {
+					suggestString = e.getName()
+							+ ", please select a card from the following that you would like to reveal to "
+							+ p.getName();
 
-					for (String suggestion : suggestions) {
-						System.out.println(count + ":  " + suggestion);
+					for (String suggestion : suggestionList) {
+						suggestString += "\n";
+						suggestString += (count + ":  " + suggestion);
 						count++;
 					}
 
-					int suggest = inputNumber(e.getName()
-							+ ", select the number associated with matching card that you would like to reveal:");
+					JOptionPane.showMessageDialog(GUI, suggestString);
 
-					totSuggestions.add(suggestions.get(suggest - 1));
+					// int suggest = inputNumber(e.getName()
+					// + ", select the number associated with matching card that
+					// you would like to reveal:");
+
+					GUI.updateBoard(e,
+							e.getName() + ", please select a card from the following that you would like to reveal to "
+									+ p.getName());
+
+					// wait untill player selects a matching card
+					while (!suggestionComplete) {
+						try {
+							Thread.sleep(25);
+						} catch (InterruptedException a) {
+							// TODO Auto-generated catch block
+							a.printStackTrace();
+						}
+					}
+					// reset suggestion status so that next player can suggest
+					// as well
+					suggestionComplete = false;
+					totSuggestions.add(chosenSuggestedCard);
 				} else {
 
 					System.out.println(e.getName() + " has no matching suggestions");
@@ -864,7 +944,7 @@ public class Controller implements ActionListener{
 					//
 
 					// game.drawBoard();
-					((CluedoBoardWithColumnsAndRows) f).updateBoard(player);
+					GUI.updateBoard(player, null);
 					// ((CluedoBoardWithColumnsAndRows) f).drawBoard();
 					// System.out.println("board updated");
 
@@ -909,7 +989,5 @@ public class Controller implements ActionListener{
 		this.coordinate = new Position(ii, jj);
 
 	}
-
-	
 
 }

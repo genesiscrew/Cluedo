@@ -23,7 +23,12 @@ public class Weapon implements Square {
 	}
 
 	public enum Weapons {
-		CandleStick("|s"), Dagger("|r"), LeadPipe("|l"), Revolver("|v"), Rope("|p"), Spanner("|n");
+		CandleStick("|s"), 
+		Dagger("|r"), 
+		LeadPipe("|l"), 
+		Revolver("|v"), 
+		Rope("|p"), 
+		Spanner("|n");
 
 		private String a;
 

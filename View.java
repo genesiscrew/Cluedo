@@ -19,7 +19,7 @@ import cluedo.Player.Character;
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
-public class CluedoBoardWithColumnsAndRows extends JFrame {
+public class View extends JFrame {
 
 	private final JPanel gui = new JPanel(new BorderLayout(9, 9));
 
@@ -61,23 +61,31 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 
 	private String textBill;
 
-	private JFrame cardMenuFrame;
+	private JFrame characterCardMenuFrame;
 
-	private JPanel cardMenuPanel;
+	private JPanel characterCardMenuPanel;
+
+	private JFrame weaponCardMenuFrame;
+
+	private JPanel weaponCardMenuPanel;
+
+	private JFrame roomCardMenuFrame;
+
+	private JPanel roomCardMenuPanel;
 
 	public JButton[][] getGUIBoard() {
 
 		return this.cluedoBoardSquares;
 	}
 
-	CluedoBoardWithColumnsAndRows(Controller controller2) throws IOException {
+	View(Controller controller2) throws IOException {
 		this.controller = controller2;
 		for (int i = 0; i < 15; i++) {
 			try {
 				emptytileImages
 						.add(ImageIO.read(new File(System.getProperty("user.dir") + "/src/squaretile" + i + ".jpeg")));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+			
 				e.printStackTrace();
 			}
 
@@ -90,43 +98,30 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 		colors.add(Color.YELLOW);
 
 		// fill up hashmap with card images
-		for (int i = 0; i < 23; i++) {
-			if (i < 6) {
 
-				for (Character a : Character.values()) {
-
-					CardImages.put(a.toString(), ImageIO.read(new File(System.getProperty("user.dir")
-							+ "/src/characterImages/images/CardImages/" + a.toString() + ".jpg")));
-
-				}
-			} 
-			else if (i < 11) {
-				for (Weapons c : Weapons.values()) {
-					System.out.println(System.getProperty("user.dir")
-							+ "/src/characterImages/images/CardImages/" + c.toString() + ".png");
-					
-				}
-				for (Weapons c : Weapons.values()) {
-					
-					CardImages.put(c.toString(), ImageIO.read(new File(System.getProperty("user.dir")
-							+ "/src/characterImages/images/CardImages/" + c.toString() + ".png")));
-
-				}
-
-			} 
-			else {
-				for (roomName d: roomName.values()) {
-					if (!d.toString().equals("Center")) {
-					System.out.println(d.toString());
-					CardImages.put(d.toString(), ImageIO.read(new File(System.getProperty("user.dir")
-							+ "/src/characterImages/images/CardImages/" + d.toString() + ".png")));
-					}
-				}
-				
-				
-			}
+		for (Character a : Character.values()) {
+			System.out.println(a.toString());
+			CardImages.put(a.toString(), ImageIO.read(new File(System.getProperty("user.dir")
+					+ "/src/characterImages/images/CardImages/" + a.toString() + ".jpg")));
 
 		}
+
+		for (Weapons c : Weapons.values()) {
+
+			CardImages.put(c.toString(), ImageIO.read(new File(System.getProperty("user.dir")
+					+ "/src/characterImages/images/CardImages/" + c.toString() + ".png")));
+
+		}
+
+		for (roomName d : roomName.values()) {
+			if (!d.toString().equals("Center")) {
+
+				CardImages.put(d.toString(), ImageIO.read(new File(System.getProperty("user.dir")
+						+ "/src/characterImages/images/CardImages/" + d.toString() + ".png")));
+			}
+		}
+
+		System.out.println(CardImages.size());
 
 		initializeGui();
 
@@ -134,8 +129,7 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 
 	public void drawBoard() {
 
-		// this.picLabel.repaint();
-		// this.gui.repaint();
+	
 	}
 
 	public final void initializeGui() {
@@ -144,19 +138,12 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 		tools = new JToolBar();
 		tools.setFloatable(false);
 		gui.add(tools, BorderLayout.PAGE_END);
-		JButton newButton = new JButton("New");
-		newButton.addActionListener(this.controller);
-		tools.add(newButton); // TODO - add functionality!
 		JButton suggest = new JButton("Suggest");
 		suggest.addActionListener(this.controller);
-		tools.add(suggest); // TODO - add functionality!
-		tools.add(newButton); // TODO - add functionality!
+		tools.add(suggest);
 		JButton accuse = new JButton("Accuse");
 		accuse.addActionListener(this.controller);
-		tools.add(accuse); // TODO - add functionality!
-		tools.addSeparator();
-		tools.add(new JButton("Resign")); // TODO - add functionality!
-		tools.addSeparator();
+		tools.add(accuse);
 		tools.add(message);
 
 		BufferedImage myPicture = null;
@@ -166,13 +153,10 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 		picLabel.setVisible(true);
 		picLabel.setLayout(new BorderLayout());
 
-		// picLabel.
-
 		// panel where buttons will be added in grid layout
 		cluedoBoard = new JPanel(new GridLayout(0, 27));
 		cluedoBoard.setBorder(new LineBorder(Color.BLACK));
 
-		// create the chess board squares
 		Insets buttonMargin = new Insets(5, 5, 5, 5);
 		int index1 = 0;
 		int index2 = 0;
@@ -201,14 +185,10 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 
 				b.addActionListener(this.controller);
 
-				// our chess pieces are 64x64 px in size, so we'll
-				// 'fill this in' using a transparent icon..
-
 				b.setOpaque(true);
 				b.setVisible(true);
 				b.setContentAreaFilled(true);
 				b.setBorderPainted(false);
-				// b.setPreferredSize(new Dimension(200, 200));
 
 				if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|-")) {
 
@@ -216,8 +196,6 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 					int index = new Random().nextInt(this.emptytileImages.size() - 1);
 					b.setIcon(new ImageIcon(emptytileImages.get(index)));
 					this.chosentileImages.add(emptytileImages.get(index));
-
-					// TODO Auto-generated catch block
 
 				}
 
@@ -239,7 +217,7 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 						b.setIcon(tunnelIcon);
 
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+
 						e.printStackTrace();
 					}
 
@@ -291,8 +269,6 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 				else if (this.controller.getGame().getBoard().getSquares()[ii][jj] instanceof PlayerSquare) {
 
 					PlayerSquare player = (PlayerSquare) this.controller.getGame().getBoard().getSquares()[ii][jj];
-					// Image scaled = player.getImage().getScaledInstance( 300,
-					// 300, java.awt.Image.SCALE_SMOOTH ) ;
 					ImageIcon playerIcon = new ImageIcon(player.getImage());
 
 					b.setIcon(playerIcon);
@@ -391,7 +367,7 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 								ImageIO.read(new File(System.getProperty("user.dir") + "/src/doorimage.jpeg"))));
 						b.setBorder(null);
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
+
 						e1.printStackTrace();
 					}
 
@@ -466,123 +442,221 @@ public class CluedoBoardWithColumnsAndRows extends JFrame {
 
 	}
 
-	public int makeSuggestion() {
+	/**
+	 * open dialog frame to ask if user would like to suggest
+	 * @param p
+	 * @return
+	 */
+	public int makeSuggestion(Player p) {
 		JFrame frame = new JFrame("example");
-		// JPanel pan = new JPanel();
-		// pan.setLayout(new FlowLayout());
-
-		// pan.add(new JLabel("Would you like to suggest?"));
-
-		Object[] options = { "Yes, please", "No way!" };
-		int n = JOptionPane.showOptionDialog(frame, "Would you like green eggs and ham?", "A Silly Question",
+		Object[] options = { "Yes, please", "No!" };
+		int n = JOptionPane.showOptionDialog(frame, p.getName() + ", Would you like to make a suggestion?", "Suggestion?",
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]); // default
 																										// button
-																										// title
-		System.out.println(n);
-		/*
-		 * JButton yes = new JButton("Yes"); JButton no = new JButton("No");
-		 * yes.setEnabled(true); no.setEnabled(true); yes.setBounds(10, 10, 40,
-		 * 40); no.setBounds(10, 10, 40, 40);
-		 * yes.addActionListener(this.controller);
-		 * no.addActionListener(this.controller); // pan.add(yes); //
-		 * pan.add(no); JDialog jd = new JDialog(); jd.setLayout(new
-		 * GridLayout(0, 2)); jd.add(yes); jd.add(no); jd.setSize(200, 200);
-		 * 
-		 * jd.setFocusable(true);
-		 * 
-		 * return jd;
-		 */
-
+		return n;
+	}
+	/**
+	 * open dialog frame to ask if user would like to accuse
+	 * @param p
+	 * @return
+	 */
+	public int makeAccusation(Player p) {
+		JFrame frame = new JFrame("example");
+		Object[] options = { "Yes, please", "No!" };
+		int n = JOptionPane.showOptionDialog(frame, p.getName() + ", Would you like to make an accusation?", "Accusation?",
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]); // default
+																										// button
 		return n;
 	}
 
-	public void CardMenuCreate() {
+	/**
+	 * initialize character menu
+	 *
+	 * @throws IOException
+	 */
+	public void characterCardMenuCreate() throws IOException {
 
-		cardMenuPanel = new JPanel(new FlowLayout());
-		cardMenuPanel.setForeground(Color.black);
-		cardMenuPanel.setBackground(Color.white);
+		characterCardMenuPanel = new JPanel(new GridLayout(0, 3));
+		characterCardMenuPanel.setForeground(Color.black);
+		characterCardMenuPanel.setBackground(Color.white);
 		Image image = null;
 
 		// first line
 
-		cardMenuPanel.setOpaque(true);
+		characterCardMenuPanel.setOpaque(true);
 
-		try {
-			image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/" + "1.jpg"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (Character a : Character.values()) {
+
+			image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/CardImages/"
+					+ a.toString() + ".jpg"));
+
+		
+			JButton pic = new JButton(new ImageIcon(image));
+			pic.setName(a.toString());
+			Insets buttonMargin = new Insets(5, 5, 5, 5);
+			pic.setMargin(buttonMargin);
+			pic.setBounds(0, 0, 0, 0);
+			pic.addActionListener(this.controller);
+			pic.setFocusable(true);
+			pic.setAlignmentX(0.5f);
+			pic.setAlignmentY(0.5f);
+
+			characterCardMenuPanel.add(pic);
+
 		}
 
-		Image scaled = image.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
-		JButton pic = new JButton(new ImageIcon(scaled));
-		pic.setName("image");
+		characterCardMenuFrame = new JFrame();
+		characterCardMenuFrame.setLocationByPlatform(true);
+		characterCardMenuFrame.setSize(600, 600);
 
-		JLabel label1 = new JLabel("Centered Text");
-		label1.setForeground(Color.GREEN);
-		label1.setFont(new Font("SansSerif", Font.BOLD, 6));
-		label1.setAlignmentX(0.5f);
-		label1.setAlignmentY(0.5f);
-
-		Insets buttonMargin = new Insets(5, 5, 5, 5);
-		pic.setMargin(buttonMargin);
-		pic.setBounds(0, 0, 0, 0);
-		pic.addActionListener(this.controller);
-		pic.setFocusable(true);
-		pic.setAlignmentX(0.5f);
-		pic.setAlignmentY(0.5f);
-
-		cardMenuPanel.add(pic);
-		cardMenuPanel.add(label1);
-
-		cardMenuFrame = new JFrame();
-		cardMenuFrame.setLocationByPlatform(true);
-		cardMenuFrame.setSize(200, 200);
-		cardMenuFrame.pack();
-		// cardMenu.add(jp1);
-		cardMenuFrame.getContentPane().add(cardMenuPanel);
-		pic.requestFocusInWindow();
+		characterCardMenuFrame.getContentPane().add(characterCardMenuPanel);
+		characterCardMenuFrame.setTitle("Select a Character who you think is Guilty!");
 
 	}
 
-	public JPanel getCardMenuPanel() {
-		return this.cardMenuPanel;
+	/**
+	 * initializes weapons menu
+	 *
+	 * @throws IOException
+	 */
+	public void weaponCardMenuCreate() throws IOException {
+
+		weaponCardMenuPanel = new JPanel(new GridLayout(0, 3));
+		weaponCardMenuPanel.setForeground(Color.black);
+		weaponCardMenuPanel.setBackground(Color.white);
+		Image image = null;
+
+		// first line
+
+		weaponCardMenuPanel.setOpaque(true);
+
+		for (Weapons a : Weapons.values()) {
+			System.out.println(a.toString());
+			image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/CardImages/"
+					+ a.toString() + ".png"));
+
+	
+			JButton pic = new JButton(new ImageIcon(image));
+			pic.setName(a.toString());
+			Insets buttonMargin = new Insets(5, 5, 5, 5);
+			pic.setMargin(buttonMargin);
+			pic.setBounds(0, 0, 0, 0);
+			pic.addActionListener(this.controller);
+			pic.setFocusable(true);
+			pic.setAlignmentX(0.5f);
+			pic.setAlignmentY(0.5f);
+
+			weaponCardMenuPanel.add(pic);
+
+		}
+
+		weaponCardMenuFrame = new JFrame();
+		weaponCardMenuFrame.setLocationByPlatform(true);
+		weaponCardMenuFrame.setSize(600, 600);
+
+		weaponCardMenuFrame.getContentPane().add(weaponCardMenuPanel);
+		weaponCardMenuFrame.setTitle("Select a Character who you think is Guilty!");
 
 	}
 
-	public JFrame getCardMenuFrame() {
-		return this.cardMenuFrame;
+	/**
+	 * initialize room menu
+	 *
+	 * @throws IOException
+	 */
+	public void roomCardMenuCreate() throws IOException {
+
+		roomCardMenuPanel = new JPanel(new GridLayout(0, 3));
+		roomCardMenuPanel.setForeground(Color.black);
+		roomCardMenuPanel.setBackground(Color.white);
+		Image image = null;
+
+		// first line
+
+		roomCardMenuPanel.setOpaque(true);
+
+		for (roomName a : roomName.values()) {
+			if (!a.toString().equals("Center")) {
+				image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/CardImages/"
+						+ a.toString() + ".png"));
+			}
+
+			// Image scaled = image.getScaledInstance(40, 40,
+			// java.awt.Image.SCALE_SMOOTH);
+			JButton pic = new JButton(new ImageIcon(image));
+			pic.setName(a.toString());
+			Insets buttonMargin = new Insets(5, 5, 5, 5);
+			pic.setMargin(buttonMargin);
+			pic.setBounds(0, 0, 0, 0);
+			pic.addActionListener(this.controller);
+			pic.setFocusable(true);
+			pic.setAlignmentX(0.5f);
+			pic.setAlignmentY(0.5f);
+
+			roomCardMenuPanel.add(pic);
+
+		}
+
+		roomCardMenuFrame = new JFrame();
+		roomCardMenuFrame.setLocationByPlatform(true);
+		roomCardMenuFrame.setSize(600, 600);
+
+		roomCardMenuFrame.getContentPane().add(roomCardMenuPanel);
+		roomCardMenuFrame.setTitle("Select a Character who you think is Guilty!");
 
 	}
 
-	public void updateBoard(Player p) {
+	public JPanel getRoomCardMenuPanel() {
+		return this.roomCardMenuPanel;
+
+	}
+
+	public JFrame getRoomCardMenuFrame() {
+		return this.roomCardMenuFrame;
+
+	}
+
+	public JPanel getWeaponCardMenuPanel() {
+		return this.weaponCardMenuPanel;
+
+	}
+
+	public JFrame getWeaponCardMenuFrame() {
+		return this.weaponCardMenuFrame;
+
+	}
+
+	public JPanel getCharacterCardMenuPanel() {
+		return this.characterCardMenuPanel;
+
+	}
+
+	public JFrame getCharacterCardMenuFrame() {
+		return this.characterCardMenuFrame;
+
+	}
+
+	public void updateBoard(Player p, String Message) {
 		// update dashboard for each player
 		cluedoBoard.removeAll();
 		tools.removeAll();
 		message = new JLabel(p.getCharacter().name() + "'s turn to play");
 		tools.setFloatable(false);
-		JButton newButton = new JButton("New");
-		newButton.addActionListener(this.controller);
-		tools.add(newButton); // TODO - add functionality!
 		JButton suggest = new JButton("Suggest");
 		suggest.addActionListener(this.controller);
-		tools.add(suggest); // TODO - add functionality!
-		tools.add(newButton); // TODO - add functionality!
+		tools.add(suggest); 
+
 		JButton accuse = new JButton("Accuse");
 		accuse.addActionListener(this.controller);
-		tools.add(accuse); // TODO - add functionality!
-		tools.addSeparator();
-		tools.add(new JButton("Resign")); // TODO - add functionality!
-		tools.addSeparator();
+		tools.add(accuse); 
 		tools.add(message);
-
 		tools.add(message);
-		tools.addSeparator();
 		for (Card c : p.getHand()) {
 			JButton imageButton = new JButton();
-			Image dimg = c.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+			Image dimg = c.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
 			imageButton.setIcon(new ImageIcon(dimg));
 			imageButton.addActionListener(this.controller);
+			imageButton.setName(c.getName());
 			tools.add(imageButton);
 			tools.addSeparator();
 		}
