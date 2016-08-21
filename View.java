@@ -127,20 +127,15 @@ public class View extends JFrame {
 
 	}
 
-	public void drawBoard() {
-
 	
-	}
 
 	public final void initializeGui() {
 		// set up the main GUI
 
 		tools = new JToolBar();
 		tools.setFloatable(false);
+		tools.setBackground(Color.GRAY);
 		gui.add(tools, BorderLayout.PAGE_END);
-		JButton suggest = new JButton("Suggest");
-		suggest.addActionListener(this.controller);
-		tools.add(suggest);
 		JButton accuse = new JButton("Accuse");
 		accuse.addActionListener(this.controller);
 		tools.add(accuse);
@@ -152,6 +147,7 @@ public class View extends JFrame {
 		picLabel.setOpaque(true);
 		picLabel.setVisible(true);
 		picLabel.setLayout(new BorderLayout());
+		picLabel.setBackground(Color.black);
 
 		// panel where buttons will be added in grid layout
 		cluedoBoard = new JPanel(new GridLayout(0, 27));
@@ -493,6 +489,8 @@ public class View extends JFrame {
 		
 			JButton pic = new JButton(new ImageIcon(image));
 			pic.setName(a.toString());
+			 pic.setBackground(Color.BLACK);
+			 pic.setBorderPainted(false);
 			Insets buttonMargin = new Insets(5, 5, 5, 5);
 			pic.setMargin(buttonMargin);
 			pic.setBounds(0, 0, 0, 0);
@@ -539,6 +537,8 @@ public class View extends JFrame {
 			JButton pic = new JButton(new ImageIcon(image));
 			pic.setName(a.toString());
 			Insets buttonMargin = new Insets(5, 5, 5, 5);
+		    pic.setBackground(Color.BLACK);
+		    pic.setBorderPainted(false);
 			pic.setMargin(buttonMargin);
 			pic.setBounds(0, 0, 0, 0);
 			pic.addActionListener(this.controller);
@@ -587,7 +587,9 @@ public class View extends JFrame {
 			pic.setName(a.toString());
 			Insets buttonMargin = new Insets(5, 5, 5, 5);
 			pic.setMargin(buttonMargin);
+			pic.setBorderPainted(false);
 			pic.setBounds(0, 0, 0, 0);
+			 pic.setBackground(Color.BLACK);
 			pic.addActionListener(this.controller);
 			pic.setFocusable(true);
 			pic.setAlignmentX(0.5f);
@@ -642,9 +644,6 @@ public class View extends JFrame {
 		tools.removeAll();
 		message = new JLabel(p.getCharacter().name() + "'s turn to play");
 		tools.setFloatable(false);
-		JButton suggest = new JButton("Suggest");
-		suggest.addActionListener(this.controller);
-		tools.add(suggest); 
 
 		JButton accuse = new JButton("Accuse");
 		accuse.addActionListener(this.controller);
@@ -815,6 +814,7 @@ public class View extends JFrame {
 						b.setText(textBill.substring(index17, index17 + 1));
 						b.setFont(new Font("Dialog", Font.BOLD, 12));
 						b.setForeground(Color.BLACK);
+					
 						index17++;
 					}
 					index18++;
@@ -1003,7 +1003,7 @@ public class View extends JFrame {
 		return this.picLabel;
 	}
 
-	public static void main(String[] args) {
+	
 
-	}
+	
 }
