@@ -96,20 +96,31 @@ public class Controller implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		// check if tile pressed in board. if so send coordinates
 
+		//check if jradio button is selected
+
+		if (e.getSource() instanceof JOptionPane) {
+			System.out.println("i am here");
+
+		}
+
+		// check if tile pressed in board. if so send coordinates
+      if (GUI.getGUIBoard() != null) {
 		for (int i = 0; i < GUI.getGUIBoard().length; i++) {
 			for (int j = 0; j < GUI.getGUIBoard()[i].length; j++) {
 				if (GUI.getGUIBoard()[i][j] == e.getSource()) {
-					this.sendCoordinates(i, j);
+					if (e.getSource() instanceof JButton) {
+						this.sendCoordinates(i, j);
 
-					// confirmed one of the buttons in our tile arrrat has been
-					// pressed
-					moveRequest = true;
-
+						// confirmed one of the buttons in our tile arrrat has
+						// been
+						// pressed
+						moveRequest = true;
+					}
 				}
 			}
 		}
+      }
 		// check if user made suggestion or accusation
 		if (game.getStatus()) {
 			for (Component i : GUI.tools.getComponents()) {
@@ -171,19 +182,21 @@ public class Controller implements ActionListener {
 		for (Component i : GUI.tools.getComponents()) {
 			if (i == e.getSource()) {
 
-				JButton tmp = (JButton) i;
+				JButton tmp = null;
+				if (i instanceof JButton) {
+					tmp = (JButton) i;
+					if (!suggestionComplete && !suggestionList.isEmpty()) {
 
-				if (!suggestionComplete && !suggestionList.isEmpty()) {
+						if (suggestionList.contains(tmp.getName())) {
 
-					if (suggestionList.contains(tmp.getName())) {
-
-						chosenSuggestedCard = tmp.getName();
-						suggestionComplete = true;
+							chosenSuggestedCard = tmp.getName();
+							suggestionComplete = true;
+						}
 					}
+
+					ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
+
 				}
-
-				ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
-
 			}
 		}
 
@@ -378,14 +391,14 @@ public class Controller implements ActionListener {
 						name = inputString("Player #" + (i + 1) + " name?");
 					}
 				}
-				String tokenName = characterList();
+				String tokenName = Controller.GUI.initializeCharacters();
 				Player.Character token = Player.Character.valueOf(tokenName);
 				while (!tokens.contains(token)) {
 					// loop until player selects an unchosen character
-					System.out.print("Character already selected. please try again");
-					System.out.println();
-					System.out.println();
-					tokenName = characterList();
+					JOptionPane.showMessageDialog(GUI,"Character already selected. please try again",
+							tokenName + " already selected", JOptionPane.INFORMATION_MESSAGE);
+
+					tokenName = Controller.GUI.initializeCharacters();
 					token = Player.Character.valueOf(tokenName);
 				}
 				// we get the required starting location based on character
@@ -427,6 +440,7 @@ public class Controller implements ActionListener {
 		Controller.GUI = new View(controller);
 
 		Controller.GUI.add((Controller.GUI).getGui());
+
 		Controller.GUI.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		Controller.GUI.setLocationByPlatform(true);
 
@@ -448,11 +462,12 @@ public class Controller implements ActionListener {
 		weaponCardMenuFrame = Controller.GUI.getWeaponCardMenuFrame();
 		roomCardMenuFrame = Controller.GUI.getRoomCardMenuFrame();
 
-		// input player info and position players on the board
-		int nplayers1 = 0;
-		while (nplayers1 < 3) {
-			nplayers1 = inputNumber("How many players? Minimum of 3");
-		}
+		//initialize number of players on the board
+		int nplayers1 = Controller.GUI.initializePlayerNum();
+		System.out.println(nplayers1);
+
+
+
 		ArrayList<Player> players = inputPlayers(nplayers1, game);
 
 		// Draw Board
@@ -518,7 +533,7 @@ public class Controller implements ActionListener {
 							p.resetVisitedSquares();
 
 						}
-						
+
 					}
 					// if player in room, and did not suggest, make him suggest
 					if (p.inRoom() && !p.getSuggest() && p.InGame) {
@@ -531,7 +546,7 @@ public class Controller implements ActionListener {
 							suggesting = -1;
 							// we show up the character card menu and set
 							// suggestion mode to true
-							
+
 							characterCardMenuFrame.setVisible(true);
 
 							while (cardsSelected < 2) {
@@ -595,13 +610,11 @@ public class Controller implements ActionListener {
 			}
 		}
 
-	
-
 	}
 
 	/**
 	 * method responsible for making accusations
-	 * 
+	 *
 	 * @param game
 	 *
 	 * @throws IOException
@@ -644,14 +657,16 @@ public class Controller implements ActionListener {
 			boolean accusation = game.checkAccusation(suspectName, weapon, room);
 			if (accusation) {
 				JOptionPane.showMessageDialog(GUI,
-						currentPlayer.getName() + ", you have won the game, spot on accusations!", "You Win!", JOptionPane.INFORMATION_MESSAGE);
+						currentPlayer.getName() + ", you have won the game, spot on accusations!", "You Win!",
+						JOptionPane.INFORMATION_MESSAGE);
 
 			} else {
 				// player has failed accusation, he will now be spectator
 
 				currentPlayer.InGame = false;
 				JOptionPane.showMessageDialog(GUI,
-						currentPlayer.getName() + ", your accusations were wrong, sorry, but you are out of the game!",  "You Lost!", JOptionPane.INFORMATION_MESSAGE);
+						currentPlayer.getName() + ", your accusations were wrong, sorry, but you are out of the game!",
+						"You Lost!", JOptionPane.INFORMATION_MESSAGE);
 
 			}
 		}
@@ -663,13 +678,15 @@ public class Controller implements ActionListener {
 
 	/**
 	 * helper method that presents suggestions to the user
-	 * 
+	 *
 	 * @param suggestionList
 	 */
 	private static void presentSuggestions(ArrayList<String> suggestionList) {
 		if (suggestionList == null || suggestionList.size() < 1) {
-	
-			JOptionPane.showMessageDialog(GUI, currentPlayer.getName() + ", we found no matching suggestions with other players", " No matching suggestions found", JOptionPane.INFORMATION_MESSAGE);
+
+			JOptionPane.showMessageDialog(GUI,
+					currentPlayer.getName() + ", we found no matching suggestions with other players",
+					" No matching suggestions found", JOptionPane.INFORMATION_MESSAGE);
 		} else {
 			// display what we found with other players
 			String suggestString = currentPlayer.getName() + ", we found the following suggestions with other players";
@@ -680,7 +697,8 @@ public class Controller implements ActionListener {
 				count++;
 			}
 
-			JOptionPane.showMessageDialog(GUI, suggestString, "Matching suggestions found!", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(GUI, suggestString, "Matching suggestions found!",
+					JOptionPane.INFORMATION_MESSAGE);
 
 		}
 
@@ -691,7 +709,7 @@ public class Controller implements ActionListener {
 	 * suggestions and confirms with other players whether they have matching
 	 * cards. if they do a list is returned by this method which contains all
 	 * matched suggestion cards with other players
-	 * 
+	 *
 	 * @param game
 	 *
 	 * @return
@@ -748,9 +766,8 @@ public class Controller implements ActionListener {
 				String suggestString = null;
 				if (suggestionList.size() > 0) {
 					suggestString = e.getName()
-							+ ", the following is a list of cards in your hand that matches the suggestions made by " + currentPlayer.getName() 
-							+ ", please pick one to reveal by clicking on it's image "
-							;
+							+ ", the following is a list of cards in your hand that matches the suggestions made by "
+							+ currentPlayer.getName() + ", please pick one to reveal by clicking on it's image ";
 
 					for (String suggestion : suggestionList) {
 						suggestString += "\n";
@@ -758,7 +775,8 @@ public class Controller implements ActionListener {
 						count++;
 					}
 
-					JOptionPane.showMessageDialog(GUI, suggestString, e.getName() + "'s turn to confirm suggestions", JOptionPane.INFORMATION_MESSAGE );
+					JOptionPane.showMessageDialog(GUI, suggestString, e.getName() + "'s turn to confirm suggestions",
+							JOptionPane.INFORMATION_MESSAGE);
 
 					// int suggest = inputNumber(e.getName()
 					// + ", select the number associated with matching card that
@@ -796,7 +814,7 @@ public class Controller implements ActionListener {
 	 * this is a key method, responsible for interacting with user into where
 	 * they want to go, interacts with player to determine whether movement is
 	 * valid,
-	 * 
+	 *
 	 * @param game
 	 * @param diceRoll
 	 *
@@ -807,7 +825,7 @@ public class Controller implements ActionListener {
 		// wait untill user has selected a tile or has requested an accusation
 		while (coordinate == null && !accuseRequest) {
 			try {
-         
+
 				Thread.sleep(5);
 
 			} catch (InterruptedException e) {
@@ -901,12 +919,12 @@ public class Controller implements ActionListener {
 
 				} // player made invalid move
 				else {
-					
+
 					return false;
 				}
 				// }
 			} else {
-				
+
 				coordinate = null;
 				ended = true;
 				if (!currentPlayer.inRoom) {
@@ -916,7 +934,7 @@ public class Controller implements ActionListener {
 
 			}
 		} catch (Exception e) {
-			
+
 			return false;
 
 		}

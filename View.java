@@ -73,6 +73,14 @@ public class View extends JFrame {
 
 	private JPanel roomCardMenuPanel;
 
+	private JRadioButton[] characterButtonArray;
+
+	private ButtonGroup group;
+
+	private JDialog userSelect;
+
+	private JRadioButton[] userNumButtonArray;
+
 	public JButton[][] getGUIBoard() {
 
 		return this.cluedoBoardSquares;
@@ -99,34 +107,120 @@ public class View extends JFrame {
 
 		// fill up hashmap with card images
 
-		for (Character a : Character.values()) {
-			System.out.println(a.toString());
-			CardImages.put(a.toString(), ImageIO.read(new File(System.getProperty("user.dir")
-					+ "/src/characterImages/images/CardImages/" + a.toString() + ".jpg")));
-
-		}
-
-		for (Weapons c : Weapons.values()) {
-
-			CardImages.put(c.toString(), ImageIO.read(new File(System.getProperty("user.dir")
-					+ "/src/characterImages/images/CardImages/" + c.toString() + ".png")));
-
-		}
-
-		for (roomName d : roomName.values()) {
-			if (!d.toString().equals("Center")) {
-
-				CardImages.put(d.toString(), ImageIO.read(new File(System.getProperty("user.dir")
-						+ "/src/characterImages/images/CardImages/" + d.toString() + ".png")));
-			}
-		}
+	
 
 		System.out.println(CardImages.size());
-
+        
 		initializeGui();
+		
 
 	}
+/**
+ * method that asks each user for character selection
+ */
+	public String initializeCharacters() {
+		
 
+		characterButtonArray = new JRadioButton[6];
+		group = new ButtonGroup();
+		JDialog dialog = null;
+	    JOptionPane optionPane = new JOptionPane();
+	    optionPane.setMessage("Please select a character");
+	    optionPane.add(new JTextField());
+	    //optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
+
+	    JPanel panel = new JPanel();
+	    panel.setLayout(new GridLayout(3,1));
+	
+	    for (int i = 0; i < Character.values().length; i++) {
+			String suspectName = Character.values()[i].name();
+
+			JRadioButton characterRadioBtn = new JRadioButton(suspectName); 
+
+			characterButtonArray[i] = characterRadioBtn; 
+			group.add(characterRadioBtn); 
+
+			characterButtonArray[i].setActionCommand(suspectName); 
+			characterButtonArray[i].addActionListener(this.controller);
+			characterRadioBtn.setToolTipText("Click here to select this suspect");
+			panel.add(characterRadioBtn);
+		}
+	    optionPane.setOptionType(JOptionPane.DEFAULT_OPTION);
+	    optionPane.add(panel);
+	    gui.add(optionPane);
+	    dialog = optionPane.createDialog(null, "Select a Character");
+	    dialog.setVisible(true);
+	    String selection = null;
+       for (JRadioButton r: characterButtonArray) {
+	    	
+	    	if (r.isSelected()) {
+	    		System.out.println("  iam here");
+	    		return selection = r.getText();
+	    	}
+	    }
+	    
+	    if (selection == null) {
+	    	System.out.println(" i am not here");
+	    	return initializeCharacters();
+	    	
+	    }
+	    
+	   return null;
+	    
+	}
+	
+public int initializePlayerNum() {
+		
+
+		userNumButtonArray = new JRadioButton[4];
+		group = new ButtonGroup();
+		JDialog dialog = null;
+	    JOptionPane optionPane = new JOptionPane();
+	    optionPane.setMessage("Please select the number of character");
+	    optionPane.add(new JTextField());
+	    //optionPane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
+	    JPanel panel = new JPanel();
+	    panel.setLayout(new GridLayout(3,1));
+	   
+	    for (int i = 0; i < 4; i++) {
+			
+
+			JRadioButton characterRadioBtn = new JRadioButton(Integer.toString(i+3)); 
+
+			userNumButtonArray[i] = characterRadioBtn; 
+			group.add(characterRadioBtn); 
+
+			userNumButtonArray[i].setActionCommand(Integer.toString(i+3)); 
+			userNumButtonArray[i].addActionListener(this.controller);
+			characterRadioBtn.setToolTipText("Click here to select number of players in game");
+			panel.add(characterRadioBtn);
+		}
+	    //optionPane.setOptionType(JOptionPane.DEFAULT_OPTION);
+	   // optionPane.add(new JButton("OK"));
+	    optionPane.add(panel);
+	    gui.add(optionPane);
+	    dialog = optionPane.createDialog(null, "Select the numbe of players");
+	    dialog.setVisible(true);
+	    int selection = 0;
+	    for (JRadioButton r: userNumButtonArray) {
+	    	
+	    	if (r.isSelected()) {
+	    		return selection = Integer.valueOf(r.getText());
+	    	}
+	    }
+	    
+	    if (selection == 0) {
+	    	
+	    	return initializePlayerNum();
+	    	
+	    }
+	    
+	   return 0;
+	    
+	}
+		
+		
+		
 	
 
 	public final void initializeGui() {
@@ -140,6 +234,7 @@ public class View extends JFrame {
 		accuse.addActionListener(this.controller);
 		tools.add(accuse);
 		tools.add(message);
+		
 
 		BufferedImage myPicture = null;
 		// initialize ball room graphics
