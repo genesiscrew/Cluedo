@@ -9,6 +9,7 @@ public interface Square {
 	public int getX();
 	public int getY();
 	public Position getPosition();
+	public String getFullName();
 
 
 

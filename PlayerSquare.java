@@ -92,7 +92,7 @@ public class PlayerSquare implements Square {
 
 	@Override
 	public Position getPosition() {
-		// TODO Auto-generated method stub
+
 		return new Position(this.x, this.y);
 	}
 

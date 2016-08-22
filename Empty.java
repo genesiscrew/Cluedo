@@ -30,20 +30,26 @@ public class Empty implements Square {
 
 	@Override
 	public int getX() {
-		
+
 		return x;
 	}
 
 	@Override
 	public int getY() {
-	
+
 		return y;
 	}
 
 	@Override
 	public Position getPosition() {
-		
+
 		return new Position(this.x, this.y);
+	}
+
+	@Override
+	public String getFullName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

@@ -141,14 +141,12 @@ public Weapons getWeapon(){
 	public boolean isValidMove(Position newPosition, Position oldPosition, Board board) {
 
         Square newSquare = board.squareAt(newPosition);
+        Square oldSquare = board.squareAt(oldPosition);
         int xDiff = Math.abs(newPosition.row()-oldPosition.row());
         int yDiff = Math.abs(newPosition.column()-oldPosition.column());
 
 
-        if (inRoom) {
-
-        	System.out.println("WHAT THE HELL IS GOING ON");
-        }
+      
 		 return // first condition is for movement outside the rooms
 				 !board.squareAt(newPosition).isOccupied()&&!this.visitedBefore.contains(board.squareAt(newPosition))
 				&& newSquare instanceof Room == false && newSquare instanceof Tunnel == false && !inRoom && ((xDiff <= 1 && yDiff == 0)|| (xDiff == 0 && yDiff <= 1))
@@ -157,7 +155,7 @@ public Weapons getWeapon(){
 						&& !board.squareAt(newPosition).isOccupied()
 						&&!this.visitedBefore.contains(board.squareAt(newPosition)))
 				//third expression is for movement within rooms
-				 || (newSquare instanceof Room == true  && inRoom && !board.squareAt(newPosition).isOccupied()) && this.lv instanceof Room
+				 || (newSquare instanceof Room == true  && inRoom && !board.squareAt(newPosition).isOccupied()) && this.lv instanceof Room && newSquare.getName().equals(lv.getName())
 				//fourth expression is for exiting rooms from doors
 		        || (newSquare instanceof Door && this.inRoom && this.lv instanceof Room)
 		        //fifth expression is for tunneling out of room

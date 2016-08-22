@@ -47,4 +47,10 @@ public class Start implements Square {
 		return new Position(this.x, this.y);
 	}
 
+	@Override
+	public String getFullName() {
+		// TODO Auto-generated method stub
+		return "Start";
+	}
+
 }

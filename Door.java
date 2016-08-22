@@ -16,44 +16,50 @@ public class Door implements Square {
 
 	@Override
 	public String getName() {
-	
+
 		return name;
 	}
 
 	@Override
 	public boolean isOccupied() {
-	
+
 		return notEmpty;
 	}
 
 	@Override
 	public void setStatus(boolean b) {
 		notEmpty = b;
-		
+
 
 	}
 
 	@Override
 	public int getX() {
-		
+
 		return x;
 	}
 
 	@Override
 	public int getY() {
-		
+
 		return y;
 	}
 
 	@Override
 	public Position getPosition() {
-		
+
 		return new Position(this.x, this.y);
 	}
 
 	public char getAscroom() {
 		return room;
 
+	}
+
+	@Override
+	public String getFullName() {
+		// TODO Auto-generated method stub
+		return "Door";
 	}
 
 }

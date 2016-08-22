@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +36,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
@@ -45,12 +48,53 @@ import cluedo.Player.Character;
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
-public class Controller implements ActionListener {
+public class Controller implements MouseListener {
 	private static Runnable r;
 	private static Game game;
 	JFrame cb;
-	private static View GUI;
+	private static GameView GUI;
 	private int x;
+	private static boolean endTurn;
+	private static boolean helpActivated = false;
+	public static String help = "How To Play Cluedo\n"
+			+ "You want to move to a different room in the mansion on every turn. Roll the die and move your token the corresponding number of spaces. \n "
+			+ "You can change directions as often as you like, \n"
+			+ "as long as you still have moves left on the roll, but you can’t cross over the same tile more than once on a single turn.\n "
+			+ "Additionally, you may not land on a square occupied by another suspect.\n"
+			+ "If you are in a room with a secret passage, you may move through the secret passage\n "
+			+ "instead of rolling, simply announce your play at the beginning of your turn.\n"
+			+ "Entering and Exiting a Room:\n"
+			+ "There are special rules for entering and exiting rooms. First, once you pass from one room to another, you may not move further,\n"
+			+ " even if you have moves left on your roll. Second, you cannot pass into a room that is blocked by another suspect token.\n "
+			+ "It will sometimes happen that both the entrance and exit of a room are blocked, in which case, you can’t leave the \n"
+			+ "room until someone moves on their turn. Further, you may not enter, and then re-enter a room on the same turn.\n"
+			+ "Suggesting Suspects/Rooms/Weapons:\n"
+			+ "When you enter a room, make a suggestion to help solve the murder. To make a suggestion, move a suspect token and a weapon\n"
+			+ " token into a room on the board, and suggest that they committed the crime with that weapon in that room.\n "
+			+ "You can only suggest that the murder occurred in the room you presently occupy.\n"
+			+ "You can make suggestions about items/rooms/suspects in your hand.\n"
+			+ "You may only make a suggestion upon entering a room, and can’t make multiple suggestions by entering/exiting a room on a single turn.\n"
+			+ "You can’t forfeit a turn to remain in a room (so you could make another suggestion there next turn),\n "
+			+ "but if you are blocked in a room by other tokens, you must stay in the room.\n"
+			+ "If your token was moved into a room, you may either roll or make a suggestion for that room on your next turn because you will\n"
+			+ " have entered the room.\n"
+			+ "You can make suggestions for suspect/weapons that are already in the room you occupy.\n"
+			+ "There is no limit to the number of weapons and suspects that can be in a single room.\n"
+			+ "Proving and Disproving Suggestions:\n"
+			+ "Once you make a suggestion, your opponents attempt to prove the suggestion false, beginning with the player to your left.\n "
+			+ "That player looks at their cards for one of the three cards that you just named, and if they have at least one of them,\n"
+			+ " they must show you (and only you) the matching card of their choice. If the player on your left is unable to disprove your\n "
+			+ "suggestion, the next player must attempt to do so. Once a player shows you a card that matches one in your suggestion, \n"
+			+ "cross that card off of your detective notepad.\n"
+
+			+ "Making an Accusation and Winning:\n"
+			+ "When you think you’ve solved the mystery ,you can make an accusation. Unlike suggestions, you don’t have to be occupying\n "
+			+ "a room to make an accusation that the crime occurred in there. You make an accusation by stating that you “accuse (suspect)\n "
+			+ "of committing the crime in the (room) with the (weapon). You are allowed to make both a suggestion and an accusation on the\n "
+			+ "same turn ,but keep in mind, if you are wrong on your accusation, you are unable to move further and cannot win the game\n "
+			+ "(though you still try to disprove the other players suggestions). When you make your Accusation, look at the three cards \n"
+			+ "in the envelope. If you are correct, you win the game. If you are incorrect, you cannot win the game.\n"
+			+ "Note: If your token is in a door way and you make a false accusation, move it into the center of the room to free up the passage way.\n ";
 	private static String chosenSuggestedCard;
 	private static boolean suggestionComplete;
 	private static Player currentPlayer;
@@ -70,295 +114,158 @@ public class Controller implements ActionListener {
 	private static JFrame roomCardMenuFrame;
 	private static ArrayList<String> suggestionList = new ArrayList<String>();
 	private static int accuseDecision = -1;
+	private static boolean diceRolled;
+	private static int diceRoll1;
+	private static int diceRoll2;
 
 	public Game getGame() {
 
 		return this.game;
 	}
 
-	/**
-	 * Get integer from System.in
-	 */
-	private static int inputNumber(String msg) {
-		System.out.print(msg + " ");
-		while (1 == 1) {
-			BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-			try {
-				String v = input.readLine();
-				return Integer.parseInt(v);
-			} catch (IOException | NumberFormatException e) {
-				System.out.println("Please enter a number!");
-			}
-		}
-	}
+	// key method that listens to different kinds of input from the GUI and
+	// feeds it into the controller
 
-	// listens to input in GUI
 	@Override
-	public void actionPerformed(ActionEvent e) {
-
-
-		//check if jradio button is selected
-
-		if (e.getSource() instanceof JOptionPane) {
-			System.out.println("i am here");
-
-		}
+	public void mouseClicked(MouseEvent e) {
 
 		// check if tile pressed in board. if so send coordinates
-      if (GUI.getGUIBoard() != null) {
-		for (int i = 0; i < GUI.getGUIBoard().length; i++) {
-			for (int j = 0; j < GUI.getGUIBoard()[i].length; j++) {
-				if (GUI.getGUIBoard()[i][j] == e.getSource()) {
-					if (e.getSource() instanceof JButton) {
-						this.sendCoordinates(i, j);
+		try {
+			if (GUI.getGUIBoard() != null) {
+				for (int i = 0; i < GUI.getGUIBoard().length; i++) {
+					for (int j = 0; j < GUI.getGUIBoard()[i].length; j++) {
+						if (GUI.getGUIBoard()[i][j] == e.getSource()) {
+							// check if help button has been pressed
 
-						// confirmed one of the buttons in our tile arrrat has
-						// been
-						// pressed
-						moveRequest = true;
-					}
-				}
-			}
-		}
-      }
-		// check if user made suggestion or accusation
-		if (game.getStatus()) {
-			for (Component i : GUI.tools.getComponents()) {
-				if (i == e.getSource()) {
+							try {
+								if (e.getSource() instanceof JButton && GUI.getGUIBoard()[i][j].getName().equals("?")) {
+									helpActivated = true;
+								}
+							} catch (Exception d) {
 
-					JButton b = (JButton) i;
-					String buttonType = b.getText();
+								helpActivated = false;
+							}
 
-					if (buttonType.equals("Accuse")) {
-						accuseRequest = true;
+							if (e.getSource() instanceof JButton && diceRoll > 0) {
+								this.sendCoordinates(i, j);
 
-					}
-				}
-			}
-		}
-		// get character suggestion cards
-		for (Component w : GUI.getCharacterCardMenuPanel().getComponents()) {
-
-			if (e.getSource() == w) {
-				System.out.println(cardsSelected);
-				// get the name of card
-				if (cardsSelected == 0) {
-					suspectName = w.getName();
-
-					cardsSelected++;
-				}
-			}
-
-		}
-		// getting weapon card
-		for (Component w : GUI.getWeaponCardMenuPanel().getComponents()) {
-
-			if (e.getSource() == w) {
-
-				// get the name of card
-				if (cardsSelected == 1) {
-					weapon = w.getName();
-					cardsSelected++;
-				}
-			}
-
-		}
-		// get room card
-		for (Component w : GUI.getRoomCardMenuPanel().getComponents()) {
-
-			if (e.getSource() == w) {
-
-				// get the name of card
-				if (cardsSelected == 2) {
-					room = w.getName();
-					cardsSelected++;
-				}
-			}
-
-		}
-
-		// check if user clicked on card image suggested
-		JPanel test = null;
-		for (Component i : GUI.tools.getComponents()) {
-			if (i == e.getSource()) {
-
-				JButton tmp = null;
-				if (i instanceof JButton) {
-					tmp = (JButton) i;
-					if (!suggestionComplete && !suggestionList.isEmpty()) {
-
-						if (suggestionList.contains(tmp.getName())) {
-
-							chosenSuggestedCard = tmp.getName();
-							suggestionComplete = true;
+								// confirmed one of the buttons in our tile
+								// arrray
+								// has
+								// been
+								// pressed
+								moveRequest = true;
+							}
 						}
 					}
-
-					ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
-
 				}
 			}
+			// check if user made accusation or rolled the dice
+			if (game.getStatus()) {
+				for (Component i : GUI.menuPanel.getComponents()) {
+					if (i == e.getSource()) {
+
+						JButton b = (JButton) i;
+						String buttonType = b.getText();
+
+						if (buttonType.equals("Accuse") && diceRoll > 0) {
+							accuseRequest = true;
+
+						} else if (buttonType.equals("Roll Dice") && !diceRolled) {
+							diceRolled = true;
+
+						} else if (buttonType.equals("End Turn") && diceRoll >= 0) {
+							endTurn = true;
+
+						}
+					}
+				}
+			}
+			// get character suggestion cards
+			for (Component w : GUI.getCharacterCardMenuPanel().getComponents()) {
+
+				if (e.getSource() == w) {
+
+					// get the name of card
+					if (cardsSelected == 0) {
+						suspectName = w.getName();
+
+						cardsSelected++;
+					}
+				}
+
+			}
+			// getting weapon card
+			for (Component w : GUI.getWeaponCardMenuPanel().getComponents()) {
+
+				if (e.getSource() == w) {
+
+					// get the name of card
+					if (cardsSelected == 1) {
+						weapon = w.getName();
+						cardsSelected++;
+					}
+				}
+
+			}
+			// get room card
+			for (Component w : GUI.getRoomCardMenuPanel().getComponents()) {
+
+				if (e.getSource() == w) {
+
+					// get the name of card
+					if (cardsSelected == 2) {
+						room = w.getName();
+						cardsSelected++;
+					}
+				}
+
+			}
+
+			// check if user clicked on card image suggested
+			JPanel test = null;
+			for (Component i : GUI.menuPanel.getComponents()) {
+				if (i == e.getSource()) {
+
+					JButton tmp = null;
+					if (i instanceof JButton) {
+						tmp = (JButton) i;
+						if (!suggestionComplete && !suggestionList.isEmpty()) {
+
+							if (suggestionList.contains(tmp.getName())) {
+
+								chosenSuggestedCard = tmp.getName();
+								suggestionComplete = true;
+							}
+						}
+
+						ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
+
+					}
+				}
+			}
+		} catch (Exception f) {
+
 		}
 
 	}
 
+	/*
+	 * get current player
+	 */
 	private Player getCurrentPlayer() {
-		// TODO Auto-generated method stub
+
 		return this.currentPlayer;
 	}
 
+	/**
+	 * set current player
+	 *
+	 * @param p
+	 */
 	private static void setCurrentPlayer(Player p) {
-		// TODO Auto-generated method stub
+
 		currentPlayer = p;
-	}
-
-	/**
-	 * input a string
-	 *
-	 * @param msg
-	 * @return
-	 */
-	private static String inputString(String msg) {
-		System.out.print(msg + " ");
-		while (1 == 1) {
-			BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-			try {
-				return input.readLine();
-			} catch (IOException e) {
-				System.out.println("I/O Error ... please try again!");
-			}
-		}
-	}
-
-	/**
-	 * helper method to enable player selection
-	 *
-	 * @return
-	 */
-	private static String characterList() throws IOException {
-
-		System.out.println("1: MissScarlet");
-		System.out.println("2: ColonelMustard");
-		System.out.println("3: MrsWhite");
-		System.out.println("4: TheReverendGreen");
-		System.out.println("5: MrsPeacock");
-		System.out.println("6: ProfessorPlum");
-		int selection = 0;
-		// convert the integer input into a character name
-		String token = null;
-		try {
-
-			selection = inputNumber("Please select one of the characters above: ");
-			if (selection < 1 || selection > 6) {
-				System.out.println("Please select a number between 1 to 6!");
-				// recursively call method untill proper selection is made
-				token = characterList();
-				return token;
-			}
-			;
-		} catch (Exception e) {
-			System.out.println("Invalid Input");
-
-		}
-
-		for (Player.Character r : Character.values()) {
-			if (r.getNumVal() == selection) {
-				token = r.name();
-
-			}
-		}
-
-		return token;
-
-	}
-
-	/**
-	 * helper method to enable weapon selection
-	 *
-	 * @return
-	 * @throws IOException
-	 */
-	private static String weaponList() throws IOException {
-
-		System.out.println("1: Candlestick");
-		System.out.println("2: Dagger");
-		System.out.println("3: Lead Pipe");
-		System.out.println("4: Revolver");
-		System.out.println("5: Rope");
-		System.out.println("6: Spanner");
-		int selection = 0;
-		String token = null;
-		try {
-			selection = inputNumber("Please select one of the weapons above: ");
-			if (selection < 1 || selection > 6) {
-				System.out.println("Please select a number between 1 to 6!");
-				// recursively call method untill proper selection is made
-				token = characterList();
-				return token;
-			}
-			;
-		} catch (Exception e) {
-			System.out.println("Invalid Input");
-
-		}
-		// convert the integer input into a character name
-
-		for (int i = 0; i < Weapons.values().length; i++) {
-			if (i == (selection - 1)) {
-				token = Weapons.values()[i].toString();
-
-			}
-		}
-
-		return token;
-
-	}
-
-	/**
-	 * helper method to enable room selection
-	 *
-	 * @return
-	 * @throws IOException
-	 */
-
-	private static String roomList() throws IOException {
-
-		System.out.println("1: Ball Room");
-		System.out.println("2: Kitchen");
-		System.out.println("3: Billiard Room");
-		System.out.println("4: Dining Room");
-		System.out.println("5: Lounge");
-		System.out.println("6: Study");
-		System.out.println("7: Hall");
-		System.out.println("8: Library");
-		System.out.println("9: Conservatory");
-
-		int selection = 0;
-		String token = null;
-		try {
-			selection = inputNumber("Please select one of the rooms above: ");
-			if (selection < 1 || selection > 9) {
-				System.out.println("Please select a number between 1 to 9!");
-				// recursively call method untill proper selection is made
-				token = characterList();
-				return token;
-			}
-			;
-		} catch (Exception e) {
-			System.out.println("Invalid Input");
-
-		}
-		// convert the integer input into a character name
-
-		for (int i = 0; i < Room.roomName.values().length; i++) {
-			if (i == (selection - 1)) {
-				token = Room.roomName.values()[i].toString();
-
-			}
-		}
-
-		return token;
-
 	}
 
 	/**
@@ -384,18 +291,21 @@ public class Controller implements ActionListener {
 			players = new ArrayList<Player>();
 
 			for (int i = 0; i != nplayers; ++i) {
-				String name = inputString("Player #" + (i + 1) + " name?");
+				// gets name from Jtextfield gui
+				String name = Controller.GUI.initializeNames();
 				if (i > 0) {
 					while (names.contains(name)) {
-						System.out.println("Duplicate name entered! please modify your name of enter a new name");
-						name = inputString("Player #" + (i + 1) + " name?");
+						JOptionPane.showMessageDialog(GUI, "player name already selected. please try again",
+								name + " already selected", JOptionPane.INFORMATION_MESSAGE);
+						name = Controller.GUI.initializeNames();
 					}
 				}
+				// gets token from jradio GUI
 				String tokenName = Controller.GUI.initializeCharacters();
 				Player.Character token = Player.Character.valueOf(tokenName);
 				while (!tokens.contains(token)) {
 					// loop until player selects an unchosen character
-					JOptionPane.showMessageDialog(GUI,"Character already selected. please try again",
+					JOptionPane.showMessageDialog(GUI, "Character already selected. please try again",
 							tokenName + " already selected", JOptionPane.INFORMATION_MESSAGE);
 
 					tokenName = Controller.GUI.initializeCharacters();
@@ -436,8 +346,8 @@ public class Controller implements ActionListener {
 
 			e.printStackTrace();
 		}
-
-		Controller.GUI = new View(controller);
+		// create a new instance of GUI
+		Controller.GUI = new GameView(controller);
 
 		Controller.GUI.add((Controller.GUI).getGui());
 
@@ -450,7 +360,6 @@ public class Controller implements ActionListener {
 		Controller.GUI.pack();
 		// ensures the minimum size is enforced.
 		Controller.GUI.setSize(1248, 768);
-		// f.setResizable(false);
 		Controller.GUI.setVisible(true);
 		Controller.GUI.repaint();
 		// initialize card menu frames
@@ -462,41 +371,48 @@ public class Controller implements ActionListener {
 		weaponCardMenuFrame = Controller.GUI.getWeaponCardMenuFrame();
 		roomCardMenuFrame = Controller.GUI.getRoomCardMenuFrame();
 
-		//initialize number of players on the board
+		// initialize number of players
 		int nplayers1 = Controller.GUI.initializePlayerNum();
-		System.out.println(nplayers1);
 
-
-
+		// create player objects and assign them to characters
 		ArrayList<Player> players = inputPlayers(nplayers1, game);
 
 		// Draw Board
 		game.drawBoard();
-		GUI.updateBoard(game.getPlayers().get(0), game.getPlayers().get(0).getName() + "'s turn to play");
+		GUI.updateBoard(game.getPlayers().get(0),
+				game.getPlayers().get(0).getName() + "'s turn to play. you have " + diceRoll + " moves left.", 0, 0);
 
 		// shuffle the deck of cards
 		Collections.shuffle(game.getDeck().cards);
-		System.out.println("deck size is " + game.getDeck().cards.size());
 
 		// store three cards from deck into center of Board
 		game.selectSecretCards();
-
-		System.out.println("deck size is " + game.getDeck().cards.size());
 
 		// deal the rest of the cards evenly to the players, while storing extra
 		// cards that have not been dealt
 		game.dealCards();
 
-		// now start the game, and let the controller interact with user and
+		// now start the game, and let the controller interact with user, GUI
+		// and
 		// game model
 		game.setStatus(true);
-		Random rand = new Random();
+
 		// run the game till we have winner
 		while (game.getStatus()) {
-			for (Player p : game.getPlayers()) {
-				setCurrentPlayer(p);
-				if (p.InGame) {
-					diceRoll = rand.nextInt(12);
+			for (Player currentPlayer : game.getPlayers()) {
+				setCurrentPlayer(currentPlayer);
+
+				GUI.updateBoard(currentPlayer, currentPlayer + "'s turn to play. you have " + diceRoll + " moves left.",
+						0, 0);
+
+				if (currentPlayer.InGame) {
+
+					// roll the dice
+					diceRoll = rollDice();
+
+					GUI.updateBoard(currentPlayer,
+							currentPlayer + "'s turn to play. you have " + diceRoll + " moves left.", diceRoll1,
+							diceRoll2);
 
 					if (diceRoll < 2) {
 						diceRoll = 2;
@@ -507,40 +423,36 @@ public class Controller implements ActionListener {
 					// board
 					// is player in a room? if not , he can make an accusation
 					// or start moving
-					if (!p.inRoom) {
+					if (!currentPlayer.inRoom) {
 						// first we ask if user wants to accuse
 						// is user still in game?
-						if (p.InGame) {
+						if (currentPlayer.InGame) {
 							// did user request accusation? before moving
 							if (accuseRequest) {
 								makeAccusation(game);
 							}
 							// if player still in game then move him
-							// if (p.InGame) {
-							while (diceRoll > 0 && !ended) {
+
+							while (diceRoll > 0 && !ended && !endTurn) {
 
 								if (movePlayer(game)) {
-									System.out.println("player moved");
+
 									diceRoll--;
 
 								}
 
-								// check again for accusation during movement
-
 							}
 							moved = true;
 							ended = false;
-							p.resetVisitedSquares();
+							currentPlayer.resetVisitedSquares();
 
 						}
 
 					}
 					// if player in room, and did not suggest, make him suggest
-					if (p.inRoom() && !p.getSuggest() && p.InGame) {
+					if (currentPlayer.inRoom() && !currentPlayer.getSuggest() && currentPlayer.InGame) {
 						// ask user if he would like to make suggestion
-						suggesting = Controller.GUI.makeSuggestion(p);
-						System.out.println(suggesting);
-						// wait untill player makes
+						suggesting = Controller.GUI.makeSuggestion(currentPlayer);
 
 						if (suggesting == 0) {
 							suggesting = -1;
@@ -564,26 +476,25 @@ public class Controller implements ActionListener {
 							}
 
 							weaponCardMenuFrame.setVisible(false);
-							System.out.println("three cards chosen");
+
 							cardsSelected = 0;
 
 							ArrayList<String> suggestionList = makeSuggestion(game);
 							// if the user suggested, present(if any) the found
 							// suggestions
-							if (p.getSuggest()) {
+							if (currentPlayer.getSuggest()) {
 								presentSuggestions(suggestionList);
-								p.setSuggest(false);
+								currentPlayer.setSuggest(false);
 
 							}
 						}
 
 						else {
-							System.out.println("we should be here");
-							System.out.println(moved);
+
 							if (!moved) {
 								while (diceRoll > 0 && !ended) {
 									if (movePlayer(game)) {
-										System.out.println("player moved");
+
 										diceRoll--;
 
 									}
@@ -591,7 +502,7 @@ public class Controller implements ActionListener {
 								moveRequest = false;
 								moved = true;
 								ended = false;
-								p.resetVisitedSquares();
+								currentPlayer.resetVisitedSquares();
 							}
 						}
 
@@ -601,14 +512,57 @@ public class Controller implements ActionListener {
 					// him
 
 					// turn has finished, so we reset all weapon squares
+
+					while (!endTurn) {
+
+						try {
+							Thread.sleep(5);
+						} catch (InterruptedException e) {
+
+							e.printStackTrace();
+						}
+
+					}
+
+					endTurn = false;
 					game.removeWeaponsfromRoom();
 
-					p.resetVisitedSquares();
-					p.setSuggest(false);
+					currentPlayer.resetVisitedSquares();
+					currentPlayer.setSuggest(false);
 				}
 
 			}
 		}
+
+	}
+
+	private static int rollDice() {
+
+		// wait till use has rolled the dice
+
+		// check if help actuvated before dice rolled
+
+		while (!diceRolled) {
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+
+				e.printStackTrace();
+			}
+
+		}
+
+		Random rand = new Random();
+		diceRolled = false;
+
+		diceRoll1 = rand.nextInt(6);
+		diceRoll2 = rand.nextInt(6);
+		while (diceRoll1 == 0 || diceRoll2 == 0) {
+			diceRoll1 = rand.nextInt(6);
+			diceRoll2 = rand.nextInt(6);
+
+		}
+		return diceRoll1 + diceRoll2;
 
 	}
 
@@ -620,9 +574,7 @@ public class Controller implements ActionListener {
 	 * @throws IOException
 	 */
 	private static void makeAccusation(Game game) throws IOException {
-		// String acuse = inputString(p.getName() + ", would you like to make an
-		// accusation? Enter Y or N");
-		// if (acuse.equalsIgnoreCase("Y")) {
+
 		// we make accusation
 
 		accuseDecision = GUI.makeAccusation(currentPlayer);
@@ -671,7 +623,6 @@ public class Controller implements ActionListener {
 			}
 		}
 
-		// }
 		accuseRequest = false;
 
 	}
@@ -701,6 +652,13 @@ public class Controller implements ActionListener {
 					JOptionPane.INFORMATION_MESSAGE);
 
 		}
+		// after suggesting, ask the user if he would like to accuse
+		try {
+			makeAccusation(game);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
@@ -716,17 +674,15 @@ public class Controller implements ActionListener {
 	 */
 	private static ArrayList<String> makeSuggestion(Game game) {
 		ArrayList<String> totSuggestions = new ArrayList<String>();
-		// suspectName = null;
+
 		Player suspect = null;
-		// weapon = null;
 
 		currentPlayer.setSuggest(true);
 		try {
-			System.out.println(currentPlayer.getName() + ", its  time for you to give us some suggestions!");
+
 			suspect = game.getPlayerfromCharacter(suspectName);
-			// weapon = weaponList();
+
 		} catch (Exception e) {
-			System.out.println("Invalid Input");
 
 		}
 		String roomName = null;
@@ -750,17 +706,16 @@ public class Controller implements ActionListener {
 		}
 		game.movesuggestedWeapontoRoom(weapon, roomName);
 		game.updatePlayersonBoard();
-		// game.drawBoard();
-		GUI.updateBoard(currentPlayer, null);
-		// ((CluedoBoardWithColumnsAndRows) f).drawBoard();
+
+		GUI.updateBoard(currentPlayer, null, 0, 0);
+
 		// now we check with each user whether they have one or many
 		// of suggested cards
 
 		for (Player e : game.getPlayers()) {
 			int count = 1;
 			if (!e.equals(currentPlayer)) {
-				// System.out.println("It is now " + e.getName() + "'s turn to
-				// play");
+
 				// we store what we find from each player into here
 				suggestionList = game.checkSuggestion(e, suspectName, weapon, roomName);
 				String suggestString = null;
@@ -778,20 +733,20 @@ public class Controller implements ActionListener {
 					JOptionPane.showMessageDialog(GUI, suggestString, e.getName() + "'s turn to confirm suggestions",
 							JOptionPane.INFORMATION_MESSAGE);
 
-					// int suggest = inputNumber(e.getName()
 					// + ", select the number associated with matching card that
 					// you would like to reveal:");
 
 					GUI.updateBoard(e,
 							e.getName() + ", please select a card from the following that you would like to reveal to "
-									+ currentPlayer.getName());
+									+ currentPlayer.getName(),
+							0, 0);
 
 					// wait untill player selects a matching card
 					while (!suggestionComplete) {
 						try {
 							Thread.sleep(5);
 						} catch (InterruptedException a) {
-							// TODO Auto-generated catch block
+
 							a.printStackTrace();
 						}
 					}
@@ -801,7 +756,6 @@ public class Controller implements ActionListener {
 					totSuggestions.add(chosenSuggestedCard);
 				} else {
 
-					System.out.println(e.getName() + " has no matching suggestions");
 				}
 
 			}
@@ -822,8 +776,8 @@ public class Controller implements ActionListener {
 	 */
 	public static boolean movePlayer(Game game) throws IOException {
 
-		// wait untill user has selected a tile or has requested an accusation
-		while (coordinate == null && !accuseRequest) {
+		// wait until user has selected a tile or has requested an accusation
+		while (coordinate == null && !accuseRequest && !endTurn) {
 			try {
 
 				Thread.sleep(5);
@@ -834,27 +788,35 @@ public class Controller implements ActionListener {
 			}
 
 		}
+		// check if help activated during movement
+		if (helpActivated) {
+			helpActivated = false;
+			JOptionPane.showMessageDialog(GUI, help, "help message", JOptionPane.INFORMATION_MESSAGE);
+		}
 
 		// check if user requested accusation during movement
 		if (accuseRequest) {
 			makeAccusation(game);
 		}
+		// check if user ended his turn during movement
+		if (endTurn) {
+
+			// exit the move method
+			return false;
+		}
 
 		try {
-			// if user enters E, we end turn
+
 			if (coordinate != null && !accuseRequest) {
 
 				Position oldPosition = new Position(currentPlayer.getLocation().getX(),
 						currentPlayer.getLocation().getY());
-				// Position newPosition = game.updatePosition(oldPosition,
-				// direction);
+
 				Position newPosition = coordinate;
-				System.out.println(oldPosition.row());
-				System.out.println(newPosition.row());
 
 				Square oldSquare = currentPlayer.getlastSquare();
 				Square newSquare = game.getBoard().squareAt(newPosition);
-				// check of player move is valid
+				// check if player move is valid
 				if (currentPlayer.isValidMove(newPosition, oldPosition, game.getBoard())) {
 
 					// code that deals with movement that leads to room
@@ -865,9 +827,6 @@ public class Controller implements ActionListener {
 							// confirmed, user entered room
 							diceRoll = 0;
 
-							// System.out.println(
-							// player.getName() + ", you have entered the " +
-							// ((Room) newSquare).getFullName());
 							currentPlayer.isInRoom(true, ((Room) newSquare).getFullName());
 
 						}
@@ -877,9 +836,6 @@ public class Controller implements ActionListener {
 					// event
 					if (currentPlayer.inRoom() && oldSquare instanceof Room && newSquare instanceof Door) {
 
-						// System.out.println(
-						// player.getName() + ", you have exited the " + ((Room)
-						// oldSquare).getFullName());
 						currentPlayer.isInRoom(false, "");
 					}
 					boolean tunneled = false;
@@ -889,8 +845,7 @@ public class Controller implements ActionListener {
 
 						Tunnel tunnel = (Tunnel) newSquare;
 						String roomtoMove = String.valueOf(tunnel.getAscroom());
-						// System.out.println("i am in tunnel that leads to " +
-						// roomtoMove);
+
 						tunneled = game.movesuggestedPlayertoTunnel(currentPlayer, roomtoMove);
 						currentPlayer.isInRoom(true, roomtoMove);
 
@@ -908,21 +863,16 @@ public class Controller implements ActionListener {
 					// finally we update the board and draw the board
 
 					game.updatePlayersonBoard();
-					//
 
-					GUI.updateBoard(currentPlayer, null);
+					GUI.updateBoard(currentPlayer, null, diceRoll1, diceRoll2);
 
 					coordinate = null;
-					// check if player is in room. if they are then stop
-					// their
-					// movement and exit this method
 
-				} // player made invalid move
-				else {
+				} else {
 
 					return false;
 				}
-				// }
+
 			} else {
 
 				coordinate = null;
@@ -948,6 +898,26 @@ public class Controller implements ActionListener {
 
 	public void sendCoordinates(int ii, int jj) {
 		this.coordinate = new Position(ii, jj);
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
 
 	}
 

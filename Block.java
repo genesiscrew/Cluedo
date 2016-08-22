@@ -14,37 +14,43 @@ public class Block implements Square {
 
 	@Override
 	public String getName() {
-		
+
 		return name;
 	}
 
 	@Override
 	public boolean isOccupied() {
-		
+
 		return true;
 	}
 
 	@Override
 	public void setStatus(boolean b) {
-		
+
 
 	}
 
 	@Override
 	public int getX() {
-		
+
 		return x;
 	}
 
 	@Override
 	public int getY() {
-		
+
 		return y;
 	}
 	@Override
 	public Position getPosition() {
-		
+
 		return new Position(this.x, this.y);
+	}
+
+	@Override
+	public String getFullName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

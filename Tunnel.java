@@ -62,4 +62,10 @@ public class Tunnel implements Square {
 
 	}
 
+	@Override
+	public String getFullName() {
+		// TODO Auto-generated method stub
+		return "Tunnel";
+	}
+
 }
