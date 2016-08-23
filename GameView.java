@@ -25,9 +25,10 @@ public class GameView extends JFrame {
 
 	JPanel mainPanel = new JPanel();
 	private JButton[][] squaresArray = new JButton[26][27];
+	// helper string to help us retrieve arrow images based on direction, to place on the board
 	private static final String[] doorHeadings = { "R", "L", "U", "U", "U", "U", "R", "L", "U", "U", "U", "R", "D", "D",
 			"D", "L", "D" };
-	JToolBar menuPanel;
+	JToolBar menu;
 	private JPanel squareGridPanel;
 	private JLabel message = new JLabel("Cluedo is ready to play!");
 	private ArrayList<Image> emptytileImages = new ArrayList<Image>();
@@ -83,6 +84,8 @@ public class GameView extends JFrame {
 
 	private JRadioButton[] userNumButtonArray;
 
+	private String textLib;
+
 	public JButton[][] getGUIBoard() {
 
 		return this.squaresArray;
@@ -92,6 +95,10 @@ public class GameView extends JFrame {
 	 * initialize the view
 	 */
 	GameView(Controller controller2) throws IOException {
+
+		// set title for main game window
+		this.setTitle("Hamid's Cluedo V2.0");
+		// connect controller object to the GUI
 		this.controller = controller2;
 		// initialize images for empty tiles
 		for (int i = 0; i < 15; i++) {
@@ -146,7 +153,7 @@ public class GameView extends JFrame {
 
 			return selection = name.getText();
 		}
-
+		// if no selection made, run the method again
 		if (name.getText().equals("")) {
 
 			return initializeNames();
@@ -186,7 +193,6 @@ public class GameView extends JFrame {
 		}
 		optionPane.setOptionType(JOptionPane.DEFAULT_OPTION);
 		optionPane.add(panel);
-		// gui.add(optionPane);
 		dialog = optionPane.createDialog(null, "Select a Character");
 		dialog.setVisible(true);
 		String selection = null;
@@ -197,7 +203,7 @@ public class GameView extends JFrame {
 				return selection = r.getText();
 			}
 		}
-
+// if no selection made, run the method again
 		if (selection == null) {
 
 			return initializeCharacters();
@@ -246,7 +252,7 @@ public class GameView extends JFrame {
 				return selection = Integer.valueOf(r.getText());
 			}
 		}
-
+		// if no selection made, run the method again
 		if (selection == 0) {
 
 			return initializePlayerNum();
@@ -262,11 +268,12 @@ public class GameView extends JFrame {
 
 
 		//set up the menu tool bar
-		menuPanel = new JToolBar();
-		menuPanel.setFloatable(false);
-		menuPanel.setBackground(Color.GRAY);
-		mainFrame.add(menuPanel, BorderLayout.PAGE_END);
-		menuPanel.add(message);
+		menu = new JToolBar();
+		menu.setFloatable(false);
+		menu.setBackground(Color.GRAY);
+		// here we add the menu panel to our main panel
+		mainFrame.add(menu, BorderLayout.PAGE_END);
+		menu.add(message);
 		mainPanel.setOpaque(true);
 		mainPanel.setVisible(true);
 		mainPanel.setLayout(new BorderLayout());
@@ -296,6 +303,8 @@ public class GameView extends JFrame {
 		int index16 = 0;
 		int index17 = 0;
 		int index18 = 0;
+		int index19 = 0;
+		int index20 = 0;
 		int doorCounter = 0;
 		for (int ii = 0; ii < squaresArray.length; ii++) {
 			for (int jj = 0; jj < squaresArray[ii].length; jj++) {
@@ -311,8 +320,10 @@ public class GameView extends JFrame {
 				button.setContentAreaFilled(true);
 				button.setBorderPainted(false);
 
-				// the code below sets the colour of each jbutton in relation to
+				// the code below sets the display of each jbutton in relation to
 				// its type, which is confirmed from the 2D Square object array
+				// for each button we make it hoverable through adding the name of associated Square object
+				//for room buttons we encode the name of the room into letters assigned to sequence of jbuttons
 				if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|-")) {
 
 					Collections.shuffle(emptytileImages);
@@ -327,6 +338,18 @@ public class GameView extends JFrame {
 
 				} else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|L")) {
 					button.setBackground(Color.DARK_GRAY);
+
+					this.textLib = "LIBRARY";
+
+					if (index19 < textLib.length() && index20 >= 5) {
+						button.setBorderPainted(false);
+
+						button.setText(textLib.substring(index19, index19 + 1));
+						button.setFont(new Font("Comic Sans", Font.BOLD, 15));
+						button.setForeground(Color.WHITE);
+						index19++;
+					}
+					index20++;
 
 				}
 
@@ -366,6 +389,7 @@ public class GameView extends JFrame {
 					index8++;
 
 				}
+
 
 				else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|E")) {
 
@@ -549,8 +573,8 @@ public class GameView extends JFrame {
 						button.setForeground(randomcol);
 						index1++;
 					}
-					// here we integrate the help button into the actual game
-					// pane
+					// here we integrate the help button into the actual game grid panel
+
 					if (index2 == 26) {
 						button.setBorderPainted(false);
 						button.setText("?");
@@ -560,7 +584,7 @@ public class GameView extends JFrame {
 						button.setForeground(randomcol);
 
 					}
-					System.out.println(index2);
+
 					index2++;
 
 				} else {
@@ -575,10 +599,12 @@ public class GameView extends JFrame {
 				squareGridPanel.add(button);
 			}
 		}
-		// here we add grid panel into another panel.
+		// here we add grid panel into the main panel
 		mainPanel.add(squareGridPanel);
 		// we add the grid and the toolbar into the frame
+
 		mainFrame.add(mainPanel);
+
 
 	}
 
@@ -624,10 +650,9 @@ public class GameView extends JFrame {
 		characterCardMenuPanel.setBackground(Color.white);
 		Image image = null;
 
-		// first line
 
 		characterCardMenuPanel.setOpaque(true);
-
+		// create weapon card jbuttons with an image
 		for (Character a : Character.values()) {
 
 			image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/CardImages/"
@@ -648,7 +673,7 @@ public class GameView extends JFrame {
 			characterCardMenuPanel.add(pic);
 
 		}
-
+		// add the character card panel to a frame to be returned
 		characterCardMenuFrame = new JFrame();
 		characterCardMenuFrame.setLocationByPlatform(true);
 		characterCardMenuFrame.setSize(600, 600);
@@ -670,10 +695,10 @@ public class GameView extends JFrame {
 		weaponCardMenuPanel.setBackground(Color.white);
 		Image image = null;
 
-		// first line
+
 
 		weaponCardMenuPanel.setOpaque(true);
-
+         // create weapon card jbuttons with an image
 		for (Weapons a : Weapons.values()) {
 
 			image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/CardImages/"
@@ -694,13 +719,13 @@ public class GameView extends JFrame {
 			weaponCardMenuPanel.add(pic);
 
 		}
-
+        // add the wepapon card panel to a frame to be returned
 		weaponCardMenuFrame = new JFrame();
 		weaponCardMenuFrame.setLocationByPlatform(true);
 		weaponCardMenuFrame.setSize(600, 600);
 
 		weaponCardMenuFrame.getContentPane().add(weaponCardMenuPanel);
-		weaponCardMenuFrame.setTitle("Select a Character who you think is Guilty!");
+		weaponCardMenuFrame.setTitle("Select the weapon you think was use in the murder!");
 
 	}
 
@@ -716,15 +741,15 @@ public class GameView extends JFrame {
 		roomCardMenuPanel.setBackground(Color.white);
 		Image image = null;
 
-		// first line
+
 
 		roomCardMenuPanel.setOpaque(true);
-
+		   // create room card jbuttons with an image
 		for (roomName a : roomName.values()) {
 			if (!a.toString().equals("Center")) {
 				image = ImageIO.read(new File(System.getProperty("user.dir") + "/src/characterImages/images/CardImages/"
 						+ a.toString() + ".png"));
-			}
+
 
 			JButton pic = new JButton(new ImageIcon(image));
 			pic.setName(a.toString());
@@ -741,13 +766,14 @@ public class GameView extends JFrame {
 			roomCardMenuPanel.add(pic);
 
 		}
-
+		}
+		// add the room card panel to a frame to be returned
 		roomCardMenuFrame = new JFrame();
 		roomCardMenuFrame.setLocationByPlatform(true);
 		roomCardMenuFrame.setSize(600, 600);
 
 		roomCardMenuFrame.getContentPane().add(roomCardMenuPanel);
-		roomCardMenuFrame.setTitle("Select a Character who you think is Guilty!");
+		roomCardMenuFrame.setTitle("Select the room where you think the murder happened!");
 
 	}
 
@@ -830,9 +856,11 @@ public class GameView extends JFrame {
 		try {
 
 			squareGridPanel.removeAll();
-			menuPanel.removeAll();
-			message = new JLabel(p.getCharacter().name() + "'s turn to play");
-			menuPanel.setFloatable(false);
+			menu.removeAll();
+			message = new JLabel(Message);
+			message.setSize(150,150);
+
+			menu.setFloatable(false);
 
 			JButton accuse = new JButton("Accuse");
 			accuse.addMouseListener(this.controller);
@@ -842,10 +870,12 @@ public class GameView extends JFrame {
 			// setup the dice images on toolbar
 			JButton rollDice = new JButton("Roll Dice");
 			rollDice.addMouseListener(this.controller);
-			menuPanel.add(rollDice);
-			menuPanel.add(accuse);
-			menuPanel.add(endTurn);
-			menuPanel.add(message);
+			menu.add(rollDice);
+			menu.add(accuse);
+			menu.add(endTurn);
+			menu.add(message);
+
+
 			JButton dice1Button = new JButton();
 			Image dice1img = diceImages.get(dice1).getScaledInstance(90, 90, Image.SCALE_SMOOTH);
 			;
@@ -853,16 +883,16 @@ public class GameView extends JFrame {
 			JButton dice2Button = new JButton();
 			Image dice2img = diceImages.get(dice2).getScaledInstance(90, 90, Image.SCALE_SMOOTH);
 			dice2Button.setIcon(new ImageIcon(dice2img));
-			menuPanel.add(dice1Button);
-			menuPanel.add(dice2Button);
-			menuPanel.addSeparator();
+			menu.add(dice1Button);
+			menu.add(dice2Button);
+			menu.addSeparator();
 			for (Card c : p.getHand()) {
 				JButton imageButton = new JButton();
 				Image dimg = c.getImage().getScaledInstance(90, 90, Image.SCALE_SMOOTH);
 				imageButton.setIcon(new ImageIcon(dimg));
 				imageButton.addMouseListener(this.controller);
 				imageButton.setName(c.getName());
-				menuPanel.add(imageButton);
+				menu.add(imageButton);
 
 			}
 
@@ -886,11 +916,13 @@ public class GameView extends JFrame {
 			int index16 = 0;
 			int index17 = 0;
 			int index18 = 0;
+			int index19 = 0;
+			int index20 = 0;
 			int doorCounter1 = 0;
 			for (int ii = 0; ii < squaresArray.length; ii++) {
 				for (int jj = 0; jj < squaresArray[ii].length; jj++) {
+					//create jbutton and give it default settings
 					JButton button = new JButton();
-
 					button.setMargin(buttonMargin);
 					button.setBounds(0, 0, 0, 0);
 					button.addMouseListener(this.controller);
@@ -900,14 +932,34 @@ public class GameView extends JFrame {
 					button.setContentAreaFilled(true);
 					button.setBorderPainted(false);
 
+					// the code below sets the display of each jbutton in relation to
+					// its type, which is confirmed from the 2D Square object array
+					// for each button we make it hoverable through adding the name of associated Square object
+					//for room buttons we encode the name of the room into letters assigned to sequence of jbuttons
+
 					if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|-")) {
 
 						button.setIcon(new ImageIcon(chosentileImages.get(tileCounter)));
 						button.setToolTipText(this.controller.getGame().getBoard().getSquares()[ii][jj].getFullName());
 						tileCounter++;
 
-					} else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|L")) {
-						button.setBackground(Color.DARK_GRAY);
+					}
+						else if (this.controller.getGame().getBoard().getSquares()[ii][jj].getName().equals("|L")) {
+							button.setBackground(Color.DARK_GRAY);
+
+							this.textLib = "LIBRARY";
+
+							if (index19 < textLib.length() && index20 >= 5) {
+								button.setBorderPainted(false);
+
+								button.setText(textLib.substring(index19, index19 + 1));
+								button.setFont(new Font("Comic Sans", Font.BOLD, 15));
+								button.setForeground(Color.WHITE);
+								index19++;
+							}
+							index20++;
+
+
 						button.setToolTipText(this.controller.getGame().getBoard().getSquares()[ii][jj].getFullName());
 
 					}
@@ -1188,6 +1240,7 @@ public class GameView extends JFrame {
 							button.setForeground(randomcol);
 							index1++;
 						}
+						// here we integrate the help button into the actual game grid panel
 						if (index2 == 26) {
 							button.setBorderPainted(false);
 							button.setText("?");
@@ -1206,14 +1259,15 @@ public class GameView extends JFrame {
 						button.setForeground(Color.BLACK);
 
 					}
+					// here we add the jbutton to an array and we also add it to grid panel
 					squaresArray[ii][jj] = button;
 					squareGridPanel.add(button);
 
 				}
 			}
-
+             // key piece of code, responsible for redrawing the grid panel and the menu panel
 			squareGridPanel.revalidate();
-			menuPanel.revalidate();
+			menu.revalidate();
 
 		}
 

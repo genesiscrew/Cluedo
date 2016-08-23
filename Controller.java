@@ -48,6 +48,12 @@ import cluedo.Player.Character;
 import cluedo.Room.roomName;
 import cluedo.Weapon.Weapons;
 
+/**
+ *
+ * @author Hamid Abubakr ID 300312017
+ *
+ */
+
 public class Controller implements MouseListener {
 	private static Runnable r;
 	private static Game game;
@@ -93,17 +99,16 @@ public class Controller implements MouseListener {
 			+ "of committing the crime in the (room) with the (weapon). You are allowed to make both a suggestion and an accusation on the\n "
 			+ "same turn ,but keep in mind, if you are wrong on your accusation, you are unable to move further and cannot win the game\n "
 			+ "(though you still try to disprove the other players suggestions). When you make your Accusation, look at the three cards \n"
-			+ "in the envelope. If you are correct, you win the game. If you are incorrect, you cannot win the game.\n"
-			+ "Note: If your token is in a door way and you make a false accusation, move it into the center of the room to free up the passage way.\n ";
+			+ "in the envelope. If you are correct, you win the game. If you are incorrect, you cannot win the game.\n";
 	private static String chosenSuggestedCard;
 	private static boolean suggestionComplete;
 	private static Player currentPlayer;
 	private static boolean moveRequest = false;
-	private static Position coordinate;
+	private static Position coordinatefromGUI;
 	private static boolean ended = false;
 	private static int diceRoll = 0;
 	private static boolean accuseRequest;
-	private static int cardsSelected = 0;
+	private static int cardsSelectedinGUI = 0;
 	private static boolean suggestAccepted;
 	private static int suggesting = -1;
 	private static JFrame characterCardMenuFrame;
@@ -124,7 +129,7 @@ public class Controller implements MouseListener {
 	}
 
 	// key method that listens to different kinds of input from the GUI and
-	// feeds it into the controller
+	// feeds it into the controller, which then feeds data to the game class
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -134,8 +139,12 @@ public class Controller implements MouseListener {
 			if (GUI.getGUIBoard() != null) {
 				for (int i = 0; i < GUI.getGUIBoard().length; i++) {
 					for (int j = 0; j < GUI.getGUIBoard()[i].length; j++) {
+						// check if user clicked on the panel that contains the
+						// grid of jbuttons, hence he wants to move or clicked
+						// the help button
 						if (GUI.getGUIBoard()[i][j] == e.getSource()) {
-							// check if help button has been pressed
+							// check if help button has been pressed, since it
+							// is integrated inside game board panel
 
 							try {
 								if (e.getSource() instanceof JButton && GUI.getGUIBoard()[i][j].getName().equals("?")) {
@@ -145,9 +154,10 @@ public class Controller implements MouseListener {
 
 								helpActivated = false;
 							}
-
+							// we also check if the diceroll is more than zero
+							// to confirm that he still has turns left to play
 							if (e.getSource() instanceof JButton && diceRoll > 0) {
-								this.sendCoordinates(i, j);
+								this.newCoordinatesfromGUI(i, j);
 
 								// confirmed one of the buttons in our tile
 								// arrray
@@ -162,7 +172,7 @@ public class Controller implements MouseListener {
 			}
 			// check if user made accusation or rolled the dice
 			if (game.getStatus()) {
-				for (Component i : GUI.menuPanel.getComponents()) {
+				for (Component i : GUI.menu.getComponents()) {
 					if (i == e.getSource()) {
 
 						JButton b = (JButton) i;
@@ -187,10 +197,10 @@ public class Controller implements MouseListener {
 				if (e.getSource() == w) {
 
 					// get the name of card
-					if (cardsSelected == 0) {
+					if (cardsSelectedinGUI == 0) {
 						suspectName = w.getName();
 
-						cardsSelected++;
+						cardsSelectedinGUI++;
 					}
 				}
 
@@ -201,9 +211,9 @@ public class Controller implements MouseListener {
 				if (e.getSource() == w) {
 
 					// get the name of card
-					if (cardsSelected == 1) {
+					if (cardsSelectedinGUI == 1) {
 						weapon = w.getName();
-						cardsSelected++;
+						cardsSelectedinGUI++;
 					}
 				}
 
@@ -214,9 +224,9 @@ public class Controller implements MouseListener {
 				if (e.getSource() == w) {
 
 					// get the name of card
-					if (cardsSelected == 2) {
+					if (cardsSelectedinGUI == 2) {
 						room = w.getName();
-						cardsSelected++;
+						cardsSelectedinGUI++;
 					}
 				}
 
@@ -224,7 +234,7 @@ public class Controller implements MouseListener {
 
 			// check if user clicked on card image suggested
 			JPanel test = null;
-			for (Component i : GUI.menuPanel.getComponents()) {
+			for (Component i : GUI.menu.getComponents()) {
 				if (i == e.getSource()) {
 
 					JButton tmp = null;
@@ -239,7 +249,7 @@ public class Controller implements MouseListener {
 							}
 						}
 
-						ImageIcon tmpIcon = (ImageIcon) ((JButton) tmp).getIcon();
+						
 
 					}
 				}
@@ -379,8 +389,8 @@ public class Controller implements MouseListener {
 
 		// Draw Board
 		game.drawBoard();
-		GUI.updateBoard(game.getPlayers().get(0),
-				game.getPlayers().get(0).getName() + "'s turn to play. you have " + diceRoll + " moves left.", 0, 0);
+		GUI.updateBoard(game.getPlayers().get(0), game.getPlayers().get(0).getCharacter().name() + "'s turn to play.",
+				0, 0);
 
 		// shuffle the deck of cards
 		Collections.shuffle(game.getDeck().cards);
@@ -402,18 +412,16 @@ public class Controller implements MouseListener {
 			for (Player currentPlayer : game.getPlayers()) {
 				setCurrentPlayer(currentPlayer);
 
-				GUI.updateBoard(currentPlayer, currentPlayer + "'s turn to play. you have " + diceRoll + " moves left.",
-						0, 0);
+				GUI.updateBoard(currentPlayer, currentPlayer.getCharacter().name() + "'s turn to play.", 0, 0);
 
 				if (currentPlayer.InGame) {
 
 					// roll the dice
 					diceRoll = rollDice();
 
-					GUI.updateBoard(currentPlayer,
-							currentPlayer + "'s turn to play. you have " + diceRoll + " moves left.", diceRoll1,
+					GUI.updateBoard(currentPlayer, currentPlayer.getCharacter().name() + "'s turn to play.", diceRoll1,
 							diceRoll2);
-
+					// set minimum dice roll to 2
 					if (diceRoll < 2) {
 						diceRoll = 2;
 					}
@@ -461,23 +469,20 @@ public class Controller implements MouseListener {
 
 							characterCardMenuFrame.setVisible(true);
 
-							while (cardsSelected < 2) {
-								if (cardsSelected == 1) {
+							while (cardsSelectedinGUI < 2) {
+
+								if (cardsSelectedinGUI == 0) {
+									characterCardMenuFrame.setVisible(true);
+								} else if (cardsSelectedinGUI == 1) {
 									characterCardMenuFrame.setVisible(false);
 									weaponCardMenuFrame.setVisible(true);
 								}
 
-								try {
-									Thread.sleep(5);
-								} catch (InterruptedException e) {
-
-									e.printStackTrace();
-								}
 							}
 
 							weaponCardMenuFrame.setVisible(false);
 
-							cardsSelected = 0;
+							cardsSelectedinGUI = 0;
 
 							ArrayList<String> suggestionList = makeSuggestion(game);
 							// if the user suggested, present(if any) the found
@@ -540,7 +545,7 @@ public class Controller implements MouseListener {
 
 		// wait till use has rolled the dice
 
-		// check if help actuvated before dice rolled
+
 
 		while (!diceRolled) {
 			try {
@@ -585,25 +590,22 @@ public class Controller implements MouseListener {
 			accuseRequest = true;
 			characterCardMenuFrame.setVisible(true);
 
-			while (cardsSelected < 3) {
-				if (cardsSelected == 1) {
+			while (cardsSelectedinGUI < 3) {
+				if (cardsSelectedinGUI == 0) {
+					characterCardMenuFrame.setVisible(true);
+				}
+				if (cardsSelectedinGUI == 1) {
 					characterCardMenuFrame.setVisible(false);
 					weaponCardMenuFrame.setVisible(true);
-				} else if (cardsSelected == 2) {
+				} else if (cardsSelectedinGUI == 2) {
 					weaponCardMenuFrame.setVisible(false);
 					roomCardMenuFrame.setVisible(true);
 				}
 
-				try {
-					Thread.sleep(5);
-				} catch (InterruptedException a) {
-
-					a.printStackTrace();
-				}
 			}
 			roomCardMenuFrame.setVisible(false);
 
-			cardsSelected = 0;
+			cardsSelectedinGUI = 0;
 
 			// next , we check with game whether accusations are valid
 			boolean accusation = game.checkAccusation(suspectName, weapon, room);
@@ -656,7 +658,7 @@ public class Controller implements MouseListener {
 		try {
 			makeAccusation(game);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -707,7 +709,7 @@ public class Controller implements MouseListener {
 		game.movesuggestedWeapontoRoom(weapon, roomName);
 		game.updatePlayersonBoard();
 
-		GUI.updateBoard(currentPlayer, null, 0, 0);
+		GUI.updateBoard(currentPlayer, currentPlayer.getCharacter().name() + ", time to suggest!", 0, 0);
 
 		// now we check with each user whether they have one or many
 		// of suggested cards
@@ -722,7 +724,8 @@ public class Controller implements MouseListener {
 				if (suggestionList.size() > 0) {
 					suggestString = e.getName()
 							+ ", the following is a list of cards in your hand that matches the suggestions made by "
-							+ currentPlayer.getName() + ", please pick one to reveal by clicking on it's image ";
+							+ currentPlayer.getName()
+							+ ", please pick one to reveal by clicking on it's image on the menu panel ";
 
 					for (String suggestion : suggestionList) {
 						suggestString += "\n";
@@ -736,10 +739,7 @@ public class Controller implements MouseListener {
 					// + ", select the number associated with matching card that
 					// you would like to reveal:");
 
-					GUI.updateBoard(e,
-							e.getName() + ", please select a card from the following that you would like to reveal to "
-									+ currentPlayer.getName(),
-							0, 0);
+					GUI.updateBoard(e,e.getCharacter().name() + ", select a card to reveal",0, 0);
 
 					// wait untill player selects a matching card
 					while (!suggestionComplete) {
@@ -777,7 +777,7 @@ public class Controller implements MouseListener {
 	public static boolean movePlayer(Game game) throws IOException {
 
 		// wait until user has selected a tile or has requested an accusation
-		while (coordinate == null && !accuseRequest && !endTurn) {
+		while (coordinatefromGUI == null && !accuseRequest && !endTurn) {
 			try {
 
 				Thread.sleep(5);
@@ -807,12 +807,12 @@ public class Controller implements MouseListener {
 
 		try {
 
-			if (coordinate != null && !accuseRequest) {
+			if (coordinatefromGUI != null && !accuseRequest) {
 
 				Position oldPosition = new Position(currentPlayer.getLocation().getX(),
 						currentPlayer.getLocation().getY());
 
-				Position newPosition = coordinate;
+				Position newPosition = coordinatefromGUI;
 
 				Square oldSquare = currentPlayer.getlastSquare();
 				Square newSquare = game.getBoard().squareAt(newPosition);
@@ -863,10 +863,17 @@ public class Controller implements MouseListener {
 					// finally we update the board and draw the board
 
 					game.updatePlayersonBoard();
+					if (diceRoll == 1) {
+						GUI.updateBoard(currentPlayer,
+								currentPlayer.getCharacter().name() + "\n" + " you have no more moves.",
+								diceRoll1, diceRoll2);
+					}  else {
+						GUI.updateBoard(currentPlayer,
+								currentPlayer.getCharacter().name() + "'s turn to play",
+								diceRoll1, diceRoll2);
+					}
 
-					GUI.updateBoard(currentPlayer, null, diceRoll1, diceRoll2);
-
-					coordinate = null;
+					coordinatefromGUI = null;
 
 				} else {
 
@@ -875,7 +882,7 @@ public class Controller implements MouseListener {
 
 			} else {
 
-				coordinate = null;
+				coordinatefromGUI = null;
 				ended = true;
 				if (!currentPlayer.inRoom) {
 					return true;
@@ -896,8 +903,8 @@ public class Controller implements MouseListener {
 
 	}
 
-	public void sendCoordinates(int ii, int jj) {
-		this.coordinate = new Position(ii, jj);
+	public void newCoordinatesfromGUI(int ii, int jj) {
+		this.coordinatefromGUI = new Position(ii, jj);
 
 	}
 
